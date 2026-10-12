@@ -91,7 +91,6 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--surface-0);color:var
 .rank-sub{font-size:11px;color:var(--text-3);}
 .rank-net{font-weight:800;font-size:15px;color:var(--blue-dark);}
 .lock-note{font-size:12px;color:var(--text-3);text-align:center;padding:14px 0;}
-#adminStatus{font-size:11px;color:var(--text-3);text-align:center;margin-top:-4px;margin-bottom:10px;}
 </style>
 </head>
 <body>
@@ -106,7 +105,6 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--surface-0);color:var
   <button class="tab-btn" id="tab-team" onclick="switchTab('team')"><span class="icon">👥</span>팀편성</button>
   <button class="tab-btn" id="tab-score" onclick="switchTab('score')"><span class="icon">⛳</span>스코어</button>
   <button class="tab-btn" id="tab-rank" onclick="switchTab('rank')"><span class="icon">🏆</span>순위</button>
-  <button class="tab-btn" id="tab-admin" onclick="switchTab('admin')"><span class="icon">⚙️</span>관리자</button>
 </div>
 
 <!-- 참가등록 -->
@@ -130,7 +128,8 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--surface-0);color:var
         <input id="regHandi" type="number" step="0.1" placeholder="예: 12">
       </div>
     </div>
-    <button class="btn btn-blue" onclick="registerPlayer()">참가 등록</button>
+    <button class="btn btn-blue" id="regSubmitBtn" onclick="registerPlayer()">참가 등록</button>
+    <button class="btn btn-gray" id="regCancelBtn" style="display:none;margin-top:8px;" onclick="cancelEdit()">수정 취소</button>
   </div>
   <div class="card">
     <div class="card-title">👥 등록 현황</div>
@@ -146,8 +145,9 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--surface-0);color:var
 <!-- 팀편성 -->
 <div class="page" id="page-team">
   <div class="card" id="teamConfigCard">
-    <div class="card-title">⚙️ 팀 구성 설정 (관리자)</div>
-    <div id="teamConfigRows"></div>
+    <div class="card-title">🎲 자동 팀편성</div>
+    <details style="margin-bottom:12px;"><summary style="font-size:13px;color:var(--text-2);cursor:pointer;padding:6px 0;">팀 구성 설정 보기/수정 (기본: 4인×3팀 남2여2, 3인×3팀 남2여1)</summary>
+    <div id="teamConfigRows" style="margin-top:10px;"></div>
     <div style="display:flex; gap:8px; margin-top:4px;">
       <button class="btn btn-gray btn-sm" style="flex:1;" onclick="addTeamConfigRow()">+ 팀 추가</button>
       <button class="btn btn-gray btn-sm" style="flex:1;" onclick="resetTeamConfig()">기본값으로 초기화</button>
@@ -156,6 +156,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--surface-0);color:var
       ‘고정배정’에 이름을 쉼표로 입력하면 그 선수는 자동편성 시 해당 팀에 고정 배정됩니다. (예: 문희정)<br>
       나머지 자리는 등록된 남/여 명단에서 무작위로 채워집니다.
     </div>
+    </details>
     <button class="btn btn-gold" style="margin-top:12px;" onclick="adminGenerateTeams()">🎲 자동 팀편성 실행</button>
     <div class="warn-box" id="teamGenWarnings"></div>
   </div>
@@ -186,27 +187,6 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--surface-0);color:var
   </div>
 </div>
 
-<!-- 관리자 -->
-<div class="page" id="page-admin">
-  <div class="card" id="adminLoginCard">
-    <div class="card-title">🔒 관리자 인증</div>
-    <div class="field">
-      <label>비밀번호</label>
-      <input id="adminPw" type="password" placeholder="비밀번호 입력">
-    </div>
-    <button class="btn btn-blue" onclick="unlockAdmin()">인증하기</button>
-  </div>
-  <div class="card" id="adminPanelCard" style="display:none;">
-    <div class="card-title">⚙️ 관리자 메뉴</div>
-    <div id="adminStatus">✅ 관리자 모드 활성화됨 (팀편성 · 참가자 삭제 가능)</div>
-    <button class="btn btn-danger" onclick="lockAdmin()">로그아웃</button>
-  </div>
-  <div class="card">
-    <div class="card-title">🗑 참가자 삭제 (관리자)</div>
-    <div id="adminDeleteList"><div class="empty-state">등록된 참가자가 없습니다</div></div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script>
@@ -222,12 +202,12 @@ const firebaseConfig = {
 };
 // CMG 골프클럽 앱과 같은 Firebase 프로젝트를 쓰되, 완전히 별도 경로(ROOT)를 사용해 기존 데이터와 섞이지 않습니다.
 const ROOT = "snuh_tour_2026";
-const ADMIN_PW = "0397";
 
 var db = null, useFirebase = false;
 var players = {};   // { 이름: {name, gender, handi, score, team} }
 var teams = {};      // { 0: {name, men, women, members:[...]}, ... }
-var admin = false;
+var admin = true; // 관리자 없음: 모두 직접 수정 가능
+var editingName = null;
 var regGender = 'male';
 
 try {
@@ -248,7 +228,6 @@ try {
   useFirebase = false;
 }
 
-try { if (localStorage.getItem("snuhAdmin") === "1") admin = true; } catch (e) {}
 
 function toast(msg) {
   var t = document.getElementById("toast");
@@ -259,14 +238,13 @@ function toast(msg) {
 }
 
 function switchTab(name) {
-  ["reg","team","score","rank","admin"].forEach(function(n) {
+  ["reg","team","score","rank"].forEach(function(n) {
     document.getElementById("page-" + n).classList.toggle("active", n === name);
     document.getElementById("tab-" + n).classList.toggle("active", n === name);
   });
   if (name === "score") renderScoreInput();
   if (name === "rank") renderRank();
-  if (name === "team") { renderTeams(); applyAdminVisibility(); }
-  if (name === "admin") applyAdminVisibility();
+  if (name === "team") renderTeams();
 }
 
 function setRegGender(g) {
@@ -279,24 +257,43 @@ function registerPlayer() {
   var name = document.getElementById("regName").value.trim();
   var handiStr = document.getElementById("regHandi").value.trim();
   if (!name) { toast("이름을 입력하세요"); return; }
-  if (players[name]) { toast("이미 등록된 이름입니다"); return; }
+  if (players[name] && editingName !== name) { toast("이미 등록된 이름입니다"); return; }
   if (handiStr === "") { toast("지정핸디를 입력하세요"); return; }
   var handi = Number(handiStr);
   if (isNaN(handi)) { toast("지정핸디는 숫자로 입력하세요"); return; }
-  var data = { name: name, gender: regGender, handi: handi, score: "", team: null, timestamp: Date.now() };
+  var prev = players[name] || {};
+  var data = { name: name, gender: regGender, handi: handi, score: (prev.score === undefined ? "" : prev.score), team: (prev.team || null), timestamp: prev.timestamp || Date.now() };
+  var wasEdit = (editingName === name);
   if (useFirebase) {
     db.ref(ROOT + "/players/" + name).set(data);
   } else {
     players[name] = data;
     renderAll();
   }
+  cancelEdit();
+  toast(wasEdit ? "✅ " + name + " 수정 완료" : "✅ " + name + " 등록 완료");
+}
+function editPlayer(name) {
+  var p = players[name]; if (!p) return;
+  editingName = name;
+  document.getElementById("regName").value = name;
+  document.getElementById("regName").disabled = true;
+  document.getElementById("regHandi").value = p.handi;
+  setRegGender(p.gender);
+  document.getElementById("regSubmitBtn").textContent = "수정 저장";
+  document.getElementById("regCancelBtn").style.display = "";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+function cancelEdit() {
+  editingName = null;
   document.getElementById("regName").value = "";
+  document.getElementById("regName").disabled = false;
   document.getElementById("regHandi").value = "";
-  toast("✅ " + name + " 등록 완료");
+  document.getElementById("regSubmitBtn").textContent = "참가 등록";
+  document.getElementById("regCancelBtn").style.display = "none";
 }
 
 function deletePlayer(name) {
-  if (!admin) { toast("관리자 인증이 필요합니다"); return; }
   if (!confirm(name + " 참가자를 삭제할까요?")) return;
   if (useFirebase) {
     db.ref(ROOT + "/players/" + name).remove();
@@ -310,7 +307,6 @@ function deletePlayer(name) {
 function renderAll() {
   renderRegList();
   renderScoreInput();
-  renderAdminDeleteList();
   renderRank();
 }
 
@@ -324,18 +320,9 @@ function renderRegList() {
   wrap.innerHTML = names.map(function(n) {
     var p = players[n];
     var badge = '<span class="badge ' + p.gender + '">' + (p.gender === 'male' ? '남' : '여') + '</span>';
-    return '<div class="list-item"><span>' + p.name + badge + '</span><span style="color:var(--text-3); font-size:12px;">핸디 ' + p.handi + (p.team ? ' · ' + p.team : '') + '</span></div>';
-  }).join("");
-}
-
-function renderAdminDeleteList() {
-  var wrap = document.getElementById("adminDeleteList");
-  var names = Object.keys(players).sort();
-  if (!names.length) { wrap.innerHTML = '<div class="empty-state">등록된 참가자가 없습니다</div>'; return; }
-  wrap.innerHTML = names.map(function(n) {
-    var p = players[n];
-    return '<div class="list-item"><span>' + p.name + '<span class="badge ' + p.gender + '">' + (p.gender === 'male' ? '남' : '여') + '</span></span>'
-      + '<button class="btn btn-danger btn-sm" onclick="deletePlayer(\'' + n.replace(/'/g, "\\'") + '\')">삭제</button></div>';
+    var q = n.replace(/'/g, "\\'");
+    return '<div class="list-item"><span>' + p.name + badge + '<span style="color:var(--text-3); font-size:12px; margin-left:6px;">핸디 ' + p.handi + (p.team ? ' · ' + p.team : '') + '</span></span>'
+      + '<span style="display:flex; gap:6px;"><button class="btn btn-gray btn-sm" onclick="editPlayer(\'' + q + '\')">수정</button><button class="btn btn-danger btn-sm" onclick="deletePlayer(\'' + q + '\')">삭제</button></span></div>';
   }).join("");
 }
 
@@ -374,11 +361,9 @@ function addTeamConfigRow() {
   wrap.appendChild(div);
 }
 function removeTeamConfigRow(btn) {
-  if (!admin) { toast("관리자 인증이 필요합니다"); return; }
   btn.parentElement.remove();
 }
 function resetTeamConfig() {
-  if (!admin) { toast("관리자 인증이 필요합니다"); return; }
   renderTeamConfigRows(DEFAULT_TEAM_CONFIG);
 }
 renderTeamConfigRows(DEFAULT_TEAM_CONFIG);
@@ -392,7 +377,7 @@ function shuffleArr(arr) {
 }
 
 function adminGenerateTeams() {
-  if (!admin) { toast("관리자 인증이 필요합니다"); return; }
+  if (Object.keys(teams).length && !confirm("이미 편성된 팀이 있습니다. 다시 편성하면 기존 팀이 바뀝니다. 계속할까요?")) return;
   var rows = document.querySelectorAll("#teamConfigRows .tc-row");
   if (!rows.length) { toast("팀 구성을 먼저 설정하세요"); return; }
   var configs = [];
@@ -577,26 +562,6 @@ function renderTeamRank() {
   }).join("");
 }
 
-function unlockAdmin() {
-  var pw = document.getElementById("adminPw").value;
-  if (pw !== ADMIN_PW) { toast("비밀번호가 틀렸습니다"); return; }
-  admin = true;
-  try { localStorage.setItem("snuhAdmin", "1"); } catch (e) {}
-  toast("✅ 관리자 모드 활성화");
-  applyAdminVisibility();
-}
-function lockAdmin() {
-  admin = false;
-  try { localStorage.removeItem("snuhAdmin"); } catch (e) {}
-  applyAdminVisibility();
-  toast("로그아웃 되었습니다");
-}
-function applyAdminVisibility() {
-  document.getElementById("adminLoginCard").style.display = admin ? "none" : "";
-  document.getElementById("adminPanelCard").style.display = admin ? "" : "none";
-  document.getElementById("teamConfigCard").style.display = admin ? "" : "none";
-}
-applyAdminVisibility();
 </script>
 </body>
 </html>
