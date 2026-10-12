@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>서울대병원 개원기념 스크린골프대회</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-database-compat.min.js"></script>
+<style>
+:root{
+  --ink:#0d3b66; --ink-2:#145ca3;
+  --surface-0:#eef3f8; --surface-1:#ffffff; --surface-2:#f6f9fc; --surface-3:#eaf1f8;
+  --border-1:rgba(13,59,102,0.10); --border-2:rgba(13,59,102,0.16); --border-3:rgba(13,59,102,0.24);
+  --blue:#145ca3; --blue-dim:#0d4680; --blue-dark:#0a3660; --blue-light:rgba(20,92,163,0.10);
+  --gold:#c08a1f; --gold-light:rgba(192,138,31,0.12);
+  --text:#15253a; --text-2:#3d5570; --text-3:#7c93ad;
+  --danger:#d64545;
+  --radius:16px; --radius-sm:10px;
+  --shadow:0 4px 20px rgba(13,59,102,0.10);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--surface-0);color:var(--text);min-height:100vh;}
+.app-header{
+  background:linear-gradient(160deg,#0a3660 0%,#145ca3 55%,#0d4680 100%);
+  color:#fff;padding:22px 20px 18px;padding-top:calc(22px + env(safe-area-inset-top));
+  text-align:center;position:sticky;top:0;z-index:100;
+  border-bottom:1px solid rgba(255,255,255,0.15);
+  box-shadow:0 1px 0 rgba(255,215,110,0.3),0 4px 24px rgba(0,0,0,0.15);
+}
+.app-header h1{font-size:19px;font-weight:700;letter-spacing:0.02em;line-height:1.4;}
+.app-header .sub{font-size:12px;opacity:0.8;margin-top:5px;font-family:'DM Mono',monospace;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.85);}
+.tab-nav{display:flex;gap:6px;background:linear-gradient(180deg,#fff 0%,var(--surface-2) 100%);border-bottom:1px solid var(--border-2);position:sticky;top:76px;z-index:99;padding:8px 8px;box-shadow:0 3px 14px rgba(13,59,102,0.08);}
+.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 2px 7px;font-size:12px;font-weight:600;color:var(--text-3);background:transparent;border:1px solid transparent;border-radius:var(--radius-sm);cursor:pointer;white-space:nowrap;}
+.tab-btn:active{transform:scale(0.95);}
+.tab-btn.active{color:#fff;background:linear-gradient(135deg,var(--blue) 0%,var(--blue-dark) 100%);box-shadow:0 3px 10px rgba(13,59,102,0.3);}
+.tab-btn .icon{font-size:18px;line-height:1;}
+.page{display:none;padding:16px 14px 90px;max-width:640px;margin:0 auto;}
+.page.active{display:block;}
+.card{background:#fff;border:1px solid var(--border-1);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:0 2px 12px rgba(13,59,102,0.07);}
+.card-title{font-size:15px;font-weight:700;color:var(--blue-dark);margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.field{margin-bottom:12px;}
+.field:last-child{margin-bottom:0;}
+.field label{display:block;font-size:12px;color:var(--text-3);margin-bottom:6px;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;}
+.field input,.field select,.field textarea{width:100%;padding:12px 14px;font-size:16px;font-family:'Noto Sans KR',sans-serif;border:1px solid var(--border-2);border-radius:var(--radius-sm);background:var(--surface-2);color:var(--text);}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-light);background:#fff;}
+.row2{display:flex;gap:10px;}
+.row2 .field{flex:1;}
+.gender-toggle{display:flex;gap:8px;}
+.gender-btn{flex:1;padding:11px;border-radius:var(--radius-sm);border:1px solid var(--border-2);background:var(--surface-2);font-size:14px;font-weight:700;cursor:pointer;color:var(--text-3);}
+.gender-btn.active.male{background:var(--blue-light);border-color:var(--blue);color:var(--blue-dark);}
+.gender-btn.active.female{background:rgba(214,69,120,0.1);border-color:#d64578;color:#9c2f58;}
+.btn{width:100%;padding:13px;font-size:15px;font-weight:700;border:none;border-radius:var(--radius-sm);cursor:pointer;transition:0.15s;}
+.btn:active{transform:scale(0.98);}
+.btn-blue{background:linear-gradient(135deg,var(--blue) 0%,var(--blue-dark) 100%);color:#fff;box-shadow:0 3px 10px rgba(13,59,102,0.3);}
+.btn-gold{background:linear-gradient(135deg,#d6a63a 0%,var(--gold) 100%);color:#fff;box-shadow:0 3px 10px rgba(192,138,31,0.3);}
+.btn-gray{background:var(--surface-3);color:var(--text-2);border:1px solid var(--border-2);}
+.btn-danger{background:#fdecec;color:var(--danger);border:1px solid rgba(214,69,69,0.3);}
+.btn-sm{padding:8px 12px;font-size:12px;width:auto;}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:var(--blue-dark);color:#fff;padding:12px 20px;border-radius:30px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.25);opacity:0;pointer-events:none;transition:0.25s;z-index:999;max-width:88vw;text-align:center;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.empty-state{text-align:center;padding:24px 0;color:var(--text-3);font-size:13px;}
+.list-item{display:flex;align-items:center;justify-content:space-between;padding:11px 4px;border-bottom:1px solid var(--border-1);font-size:14px;}
+.list-item:last-child{border-bottom:none;}
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:6px;}
+.badge.male{background:var(--blue-light);color:var(--blue-dark);}
+.badge.female{background:rgba(214,69,120,0.1);color:#9c2f58;}
+.count-chip{display:flex;gap:8px;margin-bottom:12px;}
+.count-chip div{flex:1;background:var(--surface-2);border-radius:var(--radius-sm);padding:10px;text-align:center;font-size:12px;color:var(--text-3);}
+.count-chip b{display:block;font-size:20px;color:var(--blue-dark);margin-top:2px;}
+.data-table{width:100%;border-collapse:collapse;font-size:13px;}
+.data-table th{background:var(--surface-3);color:var(--text-2);font-size:11px;padding:8px 6px;text-align:center;border-bottom:1px solid var(--border-2);}
+.data-table td{padding:9px 6px;text-align:center;border-bottom:1px solid var(--border-1);}
+.data-table input[type=number]{width:62px;padding:7px 4px;text-align:center;font-size:14px;border:1px solid var(--border-2);border-radius:8px;background:var(--surface-2);}
+.table-scroll{overflow-x:auto;}
+.team-card{border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:10px;background:var(--surface-2);}
+.team-card .t-name{font-weight:700;color:var(--blue-dark);font-size:14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;}
+.team-card .t-members{display:flex;flex-wrap:wrap;gap:6px;}
+.team-card .t-members span{background:#fff;border:1px solid var(--border-2);border-radius:14px;padding:4px 10px;font-size:12px;}
+.tc-row{display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap;}
+.tc-row input{padding:8px;font-size:13px;border:1px solid var(--border-2);border-radius:8px;background:var(--surface-2);}
+.tc-row .tc-name{width:62px;}
+.tc-row .tc-men,.tc-row .tc-women{width:42px;text-align:center;}
+.tc-row .tc-forced{flex:1;min-width:110px;}
+.tc-row .tc-del{width:auto;padding:8px 10px;font-size:12px;}
+.warn-box{font-size:12px;color:var(--danger);margin-top:8px;line-height:1.6;}
+.rank-row{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border-1);}
+.rank-num{width:30px;text-align:center;font-weight:800;font-size:15px;color:var(--blue-dark);}
+.rank-row.top1 .rank-num{color:#c08a1f;} .rank-row.top2 .rank-num{color:#8a97a6;} .rank-row.top3 .rank-num{color:#b8702e;}
+.rank-name{flex:1;font-size:14px;font-weight:600;}
+.rank-sub{font-size:11px;color:var(--text-3);}
+.rank-net{font-weight:800;font-size:15px;color:var(--blue-dark);}
+.lock-note{font-size:12px;color:var(--text-3);text-align:center;padding:14px 0;}
+#adminStatus{font-size:11px;color:var(--text-3);text-align:center;margin-top:-4px;margin-bottom:10px;}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>🏥 서울대병원 개원기념<br>스크린골프대회</h1>
+  <div class="sub">PLAYER &amp; SCORE MANAGEMENT</div>
+</div>
+
+<div class="tab-nav">
+  <button class="tab-btn active" id="tab-reg" onclick="switchTab('reg')"><span class="icon">📝</span>참가등록</button>
+  <button class="tab-btn" id="tab-team" onclick="switchTab('team')"><span class="icon">👥</span>팀편성</button>
+  <button class="tab-btn" id="tab-score" onclick="switchTab('score')"><span class="icon">⛳</span>스코어</button>
+  <button class="tab-btn" id="tab-rank" onclick="switchTab('rank')"><span class="icon">🏆</span>순위</button>
+  <button class="tab-btn" id="tab-admin" onclick="switchTab('admin')"><span class="icon">⚙️</span>관리자</button>
+</div>
+
+<!-- 참가등록 -->
+<div class="page active" id="page-reg">
+  <div class="card">
+    <div class="card-title">📝 참가 신청 (이름 · 성별 · 지정핸디)</div>
+    <div class="field">
+      <label>이름</label>
+      <input id="regName" placeholder="이름을 입력하세요">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>성별</label>
+        <div class="gender-toggle">
+          <button class="gender-btn male active" id="genderMaleBtn" onclick="setRegGender('male')">남</button>
+          <button class="gender-btn female" id="genderFemaleBtn" onclick="setRegGender('female')">여</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>지정핸디</label>
+        <input id="regHandi" type="number" step="0.1" placeholder="예: 12">
+      </div>
+    </div>
+    <button class="btn btn-blue" onclick="registerPlayer()">참가 등록</button>
+  </div>
+  <div class="card">
+    <div class="card-title">👥 등록 현황</div>
+    <div class="count-chip">
+      <div>전체<b id="cntAll">0</b></div>
+      <div>남<b id="cntMale">0</b></div>
+      <div>여<b id="cntFemale">0</b></div>
+    </div>
+    <div id="regList"><div class="empty-state">등록된 참가자가 없습니다</div></div>
+  </div>
+</div>
+
+<!-- 팀편성 -->
+<div class="page" id="page-team">
+  <div class="card" id="teamConfigCard">
+    <div class="card-title">⚙️ 팀 구성 설정 (관리자)</div>
+    <div id="teamConfigRows"></div>
+    <div style="display:flex; gap:8px; margin-top:4px;">
+      <button class="btn btn-gray btn-sm" style="flex:1;" onclick="addTeamConfigRow()">+ 팀 추가</button>
+      <button class="btn btn-gray btn-sm" style="flex:1;" onclick="resetTeamConfig()">기본값으로 초기화</button>
+    </div>
+    <div style="font-size:11px; color:var(--text-3); margin-top:10px; line-height:1.6;">
+      ‘고정배정’에 이름을 쉼표로 입력하면 그 선수는 자동편성 시 해당 팀에 고정 배정됩니다. (예: 문희정)<br>
+      나머지 자리는 등록된 남/여 명단에서 무작위로 채워집니다.
+    </div>
+    <button class="btn btn-gold" style="margin-top:12px;" onclick="adminGenerateTeams()">🎲 자동 팀편성 실행</button>
+    <div class="warn-box" id="teamGenWarnings"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">👥 편성 결과</div>
+    <div id="teamResult"><div class="empty-state">아직 편성되지 않았습니다</div></div>
+  </div>
+</div>
+
+<!-- 스코어입력 -->
+<div class="page" id="page-score">
+  <div class="card">
+    <div class="card-title">⛳ 친타수 입력 (경기 종료 후)</div>
+    <div style="font-size:12px; color:var(--text-3); margin-bottom:10px;">숫자를 입력하면 자동 저장됩니다.</div>
+    <div id="scoreInputList"><div class="empty-state">등록된 참가자가 없습니다</div></div>
+  </div>
+</div>
+
+<!-- 순위 -->
+<div class="page" id="page-rank">
+  <div class="card">
+    <div class="card-title">🏆 개인 순위 (넷스코어 = 친타수 − 지정핸디)</div>
+    <div id="indivRank"><div class="empty-state">입력된 스코어가 없습니다</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">🏆 팀 순위 (팀 평균 넷스코어)</div>
+    <div id="teamRank"><div class="empty-state">편성된 팀이 없습니다</div></div>
+  </div>
+</div>
+
+<!-- 관리자 -->
+<div class="page" id="page-admin">
+  <div class="card" id="adminLoginCard">
+    <div class="card-title">🔒 관리자 인증</div>
+    <div class="field">
+      <label>비밀번호</label>
+      <input id="adminPw" type="password" placeholder="비밀번호 입력">
+    </div>
+    <button class="btn btn-blue" onclick="unlockAdmin()">인증하기</button>
+  </div>
+  <div class="card" id="adminPanelCard" style="display:none;">
+    <div class="card-title">⚙️ 관리자 메뉴</div>
+    <div id="adminStatus">✅ 관리자 모드 활성화됨 (팀편성 · 참가자 삭제 가능)</div>
+    <button class="btn btn-danger" onclick="lockAdmin()">로그아웃</button>
+  </div>
+  <div class="card">
+    <div class="card-title">🗑 참가자 삭제 (관리자)</div>
+    <div id="adminDeleteList"><div class="empty-state">등록된 참가자가 없습니다</div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAXrZPMhTZXdj5uJufyj3ZyS5wbOiZfU9Y",
+  authDomain: "cmg-golf.firebaseapp.com",
+  databaseURL: "https://cmg-golf-default-rtdb.firebaseio.com",
+  projectId: "cmg-golf",
+  storageBucket: "cmg-golf.firebasestorage.app",
+  messagingSenderId: "1081371409280",
+  appId: "1:1081371409280:web:3b813b1a9cc4806f701f65",
+  measurementId: "G-7TGYE2GL3P"
+};
+// CMG 골프클럽 앱과 같은 Firebase 프로젝트를 쓰되, 완전히 별도 경로(ROOT)를 사용해 기존 데이터와 섞이지 않습니다.
+const ROOT = "snuh_tour_2026";
+const ADMIN_PW = "0397";
+
+var db = null, useFirebase = false;
+var players = {};   // { 이름: {name, gender, handi, score, team} }
+var teams = {};      // { 0: {name, men, women, members:[...]}, ... }
+var admin = false;
+var regGender = 'male';
+
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.database();
+  useFirebase = true;
+  db.ref(ROOT + "/players").on("value", function(snap) {
+    players = snap.val() || {};
+    renderAll();
+  });
+  db.ref(ROOT + "/teams").on("value", function(snap) {
+    teams = snap.val() || {};
+    renderTeams();
+    renderRank();
+  });
+} catch (e) {
+  console.error("Firebase 초기화 실패", e);
+  useFirebase = false;
+}
+
+try { if (localStorage.getItem("snuhAdmin") === "1") admin = true; } catch (e) {}
+
+function toast(msg) {
+  var t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(function() { t.classList.remove("show"); }, 2200);
+}
+
+function switchTab(name) {
+  ["reg","team","score","rank","admin"].forEach(function(n) {
+    document.getElementById("page-" + n).classList.toggle("active", n === name);
+    document.getElementById("tab-" + n).classList.toggle("active", n === name);
+  });
+  if (name === "score") renderScoreInput();
+  if (name === "rank") renderRank();
+  if (name === "team") { renderTeams(); applyAdminVisibility(); }
+  if (name === "admin") applyAdminVisibility();
+}
+
+function setRegGender(g) {
+  regGender = g;
+  document.getElementById("genderMaleBtn").classList.toggle("active", g === 'male');
+  document.getElementById("genderFemaleBtn").classList.toggle("active", g === 'female');
+}
+
+function registerPlayer() {
+  var name = document.getElementById("regName").value.trim();
+  var handiStr = document.getElementById("regHandi").value.trim();
+  if (!name) { toast("이름을 입력하세요"); return; }
+  if (players[name]) { toast("이미 등록된 이름입니다"); return; }
+  if (handiStr === "") { toast("지정핸디를 입력하세요"); return; }
+  var handi = Number(handiStr);
+  if (isNaN(handi)) { toast("지정핸디는 숫자로 입력하세요"); return; }
+  var data = { name: name, gender: regGender, handi: handi, score: "", team: null, timestamp: Date.now() };
+  if (useFirebase) {
+    db.ref(ROOT + "/players/" + name).set(data);
+  } else {
+    players[name] = data;
+    renderAll();
+  }
+  document.getElementById("regName").value = "";
+  document.getElementById("regHandi").value = "";
+  toast("✅ " + name + " 등록 완료");
+}
+
+function deletePlayer(name) {
+  if (!admin) { toast("관리자 인증이 필요합니다"); return; }
+  if (!confirm(name + " 참가자를 삭제할까요?")) return;
+  if (useFirebase) {
+    db.ref(ROOT + "/players/" + name).remove();
+  } else {
+    delete players[name];
+    renderAll();
+  }
+  toast("삭제되었습니다");
+}
+
+function renderAll() {
+  renderRegList();
+  renderScoreInput();
+  renderAdminDeleteList();
+  renderRank();
+}
+
+function renderRegList() {
+  var names = Object.keys(players).sort(function(a,b){ return (players[a].timestamp||0) - (players[b].timestamp||0); });
+  document.getElementById("cntAll").textContent = names.length;
+  document.getElementById("cntMale").textContent = names.filter(function(n){ return players[n].gender === 'male'; }).length;
+  document.getElementById("cntFemale").textContent = names.filter(function(n){ return players[n].gender === 'female'; }).length;
+  var wrap = document.getElementById("regList");
+  if (!names.length) { wrap.innerHTML = '<div class="empty-state">등록된 참가자가 없습니다</div>'; return; }
+  wrap.innerHTML = names.map(function(n) {
+    var p = players[n];
+    var badge = '<span class="badge ' + p.gender + '">' + (p.gender === 'male' ? '남' : '여') + '</span>';
+    return '<div class="list-item"><span>' + p.name + badge + '</span><span style="color:var(--text-3); font-size:12px;">핸디 ' + p.handi + (p.team ? ' · ' + p.team : '') + '</span></div>';
+  }).join("");
+}
+
+function renderAdminDeleteList() {
+  var wrap = document.getElementById("adminDeleteList");
+  var names = Object.keys(players).sort();
+  if (!names.length) { wrap.innerHTML = '<div class="empty-state">등록된 참가자가 없습니다</div>'; return; }
+  wrap.innerHTML = names.map(function(n) {
+    var p = players[n];
+    return '<div class="list-item"><span>' + p.name + '<span class="badge ' + p.gender + '">' + (p.gender === 'male' ? '남' : '여') + '</span></span>'
+      + '<button class="btn btn-danger btn-sm" onclick="deletePlayer(\'' + n.replace(/'/g, "\\'") + '\')">삭제</button></div>';
+  }).join("");
+}
+
+// ── 팀 구성 설정 UI ──
+var DEFAULT_TEAM_CONFIG = [
+  { name: "1팀", men: 2, women: 2, forced: "" },
+  { name: "2팀", men: 2, women: 2, forced: "" },
+  { name: "3팀", men: 2, women: 2, forced: "" },
+  { name: "4팀", men: 2, women: 1, forced: "이근우, 임경달, 문희정" },
+  { name: "5팀", men: 2, women: 1, forced: "" },
+  { name: "6팀", men: 2, women: 1, forced: "" }
+];
+
+function renderTeamConfigRows(configs) {
+  var wrap = document.getElementById("teamConfigRows");
+  wrap.innerHTML = configs.map(function(c, i) {
+    return '<div class="tc-row" data-idx="' + i + '">'
+      + '<input class="tc-name" value="' + c.name.replace(/"/g,'') + '" placeholder="팀명">'
+      + '<input class="tc-men" type="number" value="' + c.men + '" title="남자 인원">'
+      + '<input class="tc-women" type="number" value="' + c.women + '" title="여자 인원">'
+      + '<input class="tc-forced" value="' + (c.forced || '').replace(/"/g,'') + '" placeholder="고정배정(쉼표구분)">'
+      + '<button class="btn btn-danger tc-del" onclick="removeTeamConfigRow(this)">✕</button>'
+      + '</div>';
+  }).join("");
+}
+function addTeamConfigRow() {
+  var wrap = document.getElementById("teamConfigRows");
+  var idx = wrap.children.length;
+  var div = document.createElement("div");
+  div.className = "tc-row";
+  div.innerHTML = '<input class="tc-name" value="' + (idx+1) + '팀" placeholder="팀명">'
+    + '<input class="tc-men" type="number" value="2" title="남자 인원">'
+    + '<input class="tc-women" type="number" value="1" title="여자 인원">'
+    + '<input class="tc-forced" value="" placeholder="고정배정(쉼표구분)">'
+    + '<button class="btn btn-danger tc-del" onclick="removeTeamConfigRow(this)">✕</button>';
+  wrap.appendChild(div);
+}
+function removeTeamConfigRow(btn) {
+  if (!admin) { toast("관리자 인증이 필요합니다"); return; }
+  btn.parentElement.remove();
+}
+function resetTeamConfig() {
+  if (!admin) { toast("관리자 인증이 필요합니다"); return; }
+  renderTeamConfigRows(DEFAULT_TEAM_CONFIG);
+}
+renderTeamConfigRows(DEFAULT_TEAM_CONFIG);
+
+function shuffleArr(arr) {
+  for (var i = arr.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+  }
+  return arr;
+}
+
+function adminGenerateTeams() {
+  if (!admin) { toast("관리자 인증이 필요합니다"); return; }
+  var rows = document.querySelectorAll("#teamConfigRows .tc-row");
+  if (!rows.length) { toast("팀 구성을 먼저 설정하세요"); return; }
+  var configs = [];
+  rows.forEach(function(row, idx) {
+    var name = row.querySelector(".tc-name").value.trim() || ((idx + 1) + "팀");
+    var men = parseInt(row.querySelector(".tc-men").value, 10) || 0;
+    var women = parseInt(row.querySelector(".tc-women").value, 10) || 0;
+    var forcedRaw = row.querySelector(".tc-forced").value.trim();
+    var forced = forcedRaw ? forcedRaw.split(",").map(function(s){ return s.trim(); }).filter(Boolean) : [];
+    configs.push({ name: name, men: men, women: women, forced: forced, assignedMen: [], assignedWomen: [] });
+  });
+
+  var allNames = Object.keys(players);
+  var menPool = shuffleArr(allNames.filter(function(n){ return players[n].gender === 'male'; }));
+  var womenPool = shuffleArr(allNames.filter(function(n){ return players[n].gender === 'female'; }));
+  var used = {};
+  var errors = [];
+
+  configs.forEach(function(cfg) {
+    cfg.forced.forEach(function(nm) {
+      var p = players[nm];
+      if (!p) { errors.push(nm + " : 등록되지 않은 이름"); return; }
+      if (used[nm]) { errors.push(nm + " : 이미 다른 팀에 중복 배정됨"); return; }
+      used[nm] = true;
+      if (p.gender === 'male') cfg.assignedMen.push(nm); else cfg.assignedWomen.push(nm);
+      var mi = menPool.indexOf(nm); if (mi > -1) menPool.splice(mi, 1);
+      var wi = womenPool.indexOf(nm); if (wi > -1) womenPool.splice(wi, 1);
+    });
+  });
+
+  configs.forEach(function(cfg) {
+    while (cfg.assignedMen.length < cfg.men && menPool.length) cfg.assignedMen.push(menPool.shift());
+    while (cfg.assignedWomen.length < cfg.women && womenPool.length) cfg.assignedWomen.push(womenPool.shift());
+    if (cfg.assignedMen.length < cfg.men) errors.push(cfg.name + " : 남자 인원 부족 (" + cfg.assignedMen.length + "/" + cfg.men + ")");
+    if (cfg.assignedWomen.length < cfg.women) errors.push(cfg.name + " : 여자 인원 부족 (" + cfg.assignedWomen.length + "/" + cfg.women + ")");
+  });
+
+  var teamsOut = {};
+  configs.forEach(function(cfg, idx) {
+    teamsOut[idx] = { name: cfg.name, men: cfg.men, women: cfg.women, members: cfg.assignedMen.concat(cfg.assignedWomen) };
+  });
+
+  if (useFirebase) {
+    var updates = {};
+    updates[ROOT + "/teams"] = teamsOut;
+    allNames.forEach(function(nm) { updates[ROOT + "/players/" + nm + "/team"] = null; });
+    Object.keys(teamsOut).forEach(function(ti) {
+      teamsOut[ti].members.forEach(function(nm) {
+        updates[ROOT + "/players/" + nm + "/team"] = teamsOut[ti].name;
+      });
+    });
+    db.ref().update(updates);
+  } else {
+    teams = teamsOut;
+    allNames.forEach(function(nm) { players[nm].team = null; });
+    Object.keys(teamsOut).forEach(function(ti) {
+      teamsOut[ti].members.forEach(function(nm) { players[nm].team = teamsOut[ti].name; });
+    });
+    renderTeams(); renderAll();
+  }
+
+  var leftover = menPool.length + womenPool.length;
+  var msg = "✅ 팀편성 완료";
+  if (leftover) msg += " — 미배정 " + leftover + "명(남 " + menPool.length + ", 여 " + womenPool.length + ")";
+  toast(msg);
+  document.getElementById("teamGenWarnings").innerHTML = errors.length
+    ? errors.map(function(e){ return "⚠ " + e; }).join("<br>")
+    : "";
+}
+
+function renderTeams() {
+  var wrap = document.getElementById("teamResult");
+  var keys = Object.keys(teams);
+  if (!keys.length) { wrap.innerHTML = '<div class="empty-state">아직 편성되지 않았습니다</div>'; return; }
+  wrap.innerHTML = keys.map(function(k) {
+    var t = teams[k];
+    var members = (t.members || []).map(function(nm) {
+      var p = players[nm];
+      var g = p ? (p.gender === 'male' ? '남' : '여') : '?';
+      var h = p ? p.handi : '-';
+      return '<span>' + nm + ' (' + g + '·' + h + ')</span>';
+    }).join("");
+    return '<div class="team-card"><div class="t-name"><span>' + t.name + '</span><span style="font-size:11px; color:var(--text-3); font-weight:400;">' + (t.members ? t.members.length : 0) + '명</span></div><div class="t-members">' + members + '</div></div>';
+  }).join("");
+}
+
+function renderScoreInput() {
+  var wrap = document.getElementById("scoreInputList");
+  var names = Object.keys(players).sort(function(a,b){
+    var ta = players[a].team || "", tb = players[b].team || "";
+    if (ta !== tb) return ta.localeCompare(tb, 'ko');
+    return a.localeCompare(b, 'ko');
+  });
+  if (!names.length) { wrap.innerHTML = '<div class="empty-state">등록된 참가자가 없습니다</div>'; return; }
+  wrap.innerHTML = '<div class="table-scroll"><table class="data-table"><thead><tr><th>이름</th><th>팀</th><th>지정핸디</th><th>친타수</th></tr></thead><tbody>'
+    + names.map(function(n) {
+        var p = players[n];
+        return '<tr><td style="text-align:left;">' + p.name + '<span class="badge ' + p.gender + '">' + (p.gender === 'male' ? '남' : '여') + '</span></td>'
+          + '<td>' + (p.team || '-') + '</td><td>' + p.handi + '</td>'
+          + '<td><input type="number" step="0.1" value="' + (p.score === "" || p.score === undefined || p.score === null ? "" : p.score) + '" onchange="saveScore(\'' + n.replace(/'/g, "\\'") + '\', this.value)"></td></tr>';
+      }).join("") + '</tbody></table></div>';
+}
+
+function saveScore(name, val) {
+  val = val.trim();
+  var score = val === "" ? "" : Number(val);
+  if (val !== "" && isNaN(score)) { toast("숫자로 입력하세요"); return; }
+  if (useFirebase) {
+    db.ref(ROOT + "/players/" + name + "/score").set(score);
+  } else {
+    if (players[name]) players[name].score = score;
+    renderRank();
+  }
+  toast(name + " 친타수 저장: " + (val === "" ? "(삭제됨)" : val));
+}
+
+function renderRank() {
+  renderIndivRank();
+  renderTeamRank();
+}
+
+function renderIndivRank() {
+  var wrap = document.getElementById("indivRank");
+  var list = Object.keys(players).filter(function(n) {
+    var s = players[n].score;
+    return s !== "" && s !== undefined && s !== null && !isNaN(Number(s));
+  }).map(function(n) {
+    var p = players[n];
+    return { name: p.name, gender: p.gender, team: p.team || '-', handi: Number(p.handi), score: Number(p.score), net: Number(p.score) - Number(p.handi) };
+  });
+  if (!list.length) { wrap.innerHTML = '<div class="empty-state">입력된 스코어가 없습니다</div>'; return; }
+  list.sort(function(a, b) { return a.net - b.net; });
+  var rank = 0, prevNet = null;
+  list.forEach(function(item, idx) {
+    if (item.net !== prevNet) { rank = idx + 1; prevNet = item.net; }
+    item.rank = rank;
+  });
+  wrap.innerHTML = list.map(function(item) {
+    var cls = item.rank === 1 ? 'top1' : item.rank === 2 ? 'top2' : item.rank === 3 ? 'top3' : '';
+    var medal = item.rank === 1 ? '🥇' : item.rank === 2 ? '🥈' : item.rank === 3 ? '🥉' : item.rank;
+    return '<div class="rank-row ' + cls + '"><div class="rank-num">' + medal + '</div>'
+      + '<div class="rank-name">' + item.name + '<span class="badge ' + item.gender + '">' + (item.gender === 'male' ? '남' : '여') + '</span><div class="rank-sub">' + item.team + ' · 핸디 ' + item.handi + ' · 친타수 ' + item.score + '</div></div>'
+      + '<div class="rank-net">' + item.net + '</div></div>';
+  }).join("");
+}
+
+function renderTeamRank() {
+  var wrap = document.getElementById("teamRank");
+  var keys = Object.keys(teams);
+  if (!keys.length) { wrap.innerHTML = '<div class="empty-state">편성된 팀이 없습니다</div>'; return; }
+  var list = keys.map(function(k) {
+    var t = teams[k];
+    var members = t.members || [];
+    var done = members.filter(function(nm) {
+      var p = players[nm];
+      return p && p.score !== "" && p.score !== undefined && p.score !== null && !isNaN(Number(p.score));
+    });
+    var totalNet = done.reduce(function(sum, nm) { return sum + (Number(players[nm].score) - Number(players[nm].handi)); }, 0);
+    var avgNet = done.length ? totalNet / done.length : null;
+    return { name: t.name, size: members.length, done: done.length, avgNet: avgNet, complete: members.length > 0 && done.length === members.length };
+  });
+  list.sort(function(a, b) {
+    if (a.complete && b.complete) return a.avgNet - b.avgNet;
+    if (a.complete) return -1;
+    if (b.complete) return 1;
+    return b.done - a.done;
+  });
+  var rank = 0, prevAvg = null, dispIdx = 0;
+  list.forEach(function(item) {
+    if (!item.complete) return;
+    dispIdx++;
+    if (item.avgNet !== prevAvg) { rank = dispIdx; prevAvg = item.avgNet; }
+    item.rank = rank;
+  });
+  wrap.innerHTML = list.map(function(item) {
+    if (!item.complete) {
+      return '<div class="rank-row"><div class="rank-num">-</div><div class="rank-name">' + item.name + '<div class="rank-sub">진행중 ' + item.done + '/' + item.size + '</div></div><div class="rank-net">-</div></div>';
+    }
+    var cls = item.rank === 1 ? 'top1' : item.rank === 2 ? 'top2' : item.rank === 3 ? 'top3' : '';
+    var medal = item.rank === 1 ? '🥇' : item.rank === 2 ? '🥈' : item.rank === 3 ? '🥉' : item.rank;
+    return '<div class="rank-row ' + cls + '"><div class="rank-num">' + medal + '</div><div class="rank-name">' + item.name + '<div class="rank-sub">' + item.size + '명 · 평균 넷스코어</div></div><div class="rank-net">' + item.avgNet.toFixed(1) + '</div></div>';
+  }).join("");
+}
+
+function unlockAdmin() {
+  var pw = document.getElementById("adminPw").value;
+  if (pw !== ADMIN_PW) { toast("비밀번호가 틀렸습니다"); return; }
+  admin = true;
+  try { localStorage.setItem("snuhAdmin", "1"); } catch (e) {}
+  toast("✅ 관리자 모드 활성화");
+  applyAdminVisibility();
+}
+function lockAdmin() {
+  admin = false;
+  try { localStorage.removeItem("snuhAdmin"); } catch (e) {}
+  applyAdminVisibility();
+  toast("로그아웃 되었습니다");
+}
+function applyAdminVisibility() {
+  document.getElementById("adminLoginCard").style.display = admin ? "none" : "";
+  document.getElementById("adminPanelCard").style.display = admin ? "" : "none";
+  document.getElementById("teamConfigCard").style.display = admin ? "" : "none";
+}
+applyAdminVisibility();
+</script>
+</body>
+</html>
