@@ -2,115 +2,369 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>서울대병원 개원기념 스크린골프대회</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SGS 스크린골프동호회 단합대회</title>
+<meta property="og:title" content="SGS 스크린골프동호회 단합대회">
+<meta property="og:description" content="2026.10.15(목) 골프존파크 쌍문 고골프누리 · 참가등록 · 팀편성 · 스코어 · 순위">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-app-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-database-compat.min.js"></script>
 <style>
 :root{
-  --ink:#0d3b66; --ink-2:#145ca3;
-  --surface-0:#eef3f8; --surface-1:#ffffff; --surface-2:#f6f9fc; --surface-3:#eaf1f8;
-  --border-1:rgba(13,59,102,0.10); --border-2:rgba(13,59,102,0.16); --border-3:rgba(13,59,102,0.24);
-  --blue:#145ca3; --blue-dim:#0d4680; --blue-dark:#0a3660; --blue-light:rgba(20,92,163,0.10);
-  --gold:#c08a1f; --gold-light:rgba(192,138,31,0.12);
-  --text:#15253a; --text-2:#3d5570; --text-3:#7c93ad;
+  --navy:#0c2340; --navy-2:#12315a;
+  --green:#1a8a4a; --green-dark:#0f6b38; --green-mid:#22a35a; --mint:#4be08a;
+  --green-light:#e4f5ea; --green-line:#bfe6cd;
+  --bg:#f1f4f8; --card:#ffffff; --panel:#f3f6fa;
+  --border:#dde4ec; --border-2:#c9d3df;
+  --text:#14233a; --text-2:#46586f; --text-3:#7d8da1;
+  --gold-bg:#fff6dc; --gold-line:#e6b94a; --gold-text:#8a6208;
   --danger:#d64545;
-  --radius:16px; --radius-sm:10px;
-  --shadow:0 4px 20px rgba(13,59,102,0.10);
+  --radius:14px; --radius-sm:10px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-body{font-family:'Noto Sans KR',sans-serif;background:var(--surface-0);color:var(--text);min-height:100vh;}
-.app-header{
-  background:linear-gradient(160deg,#0a3660 0%,#145ca3 55%,#0d4680 100%);
-  color:#fff;padding:22px 20px 18px;padding-top:calc(22px + env(safe-area-inset-top));
-  text-align:center;position:sticky;top:0;z-index:100;
-  border-bottom:1px solid rgba(255,255,255,0.15);
-  box-shadow:0 1px 0 rgba(255,215,110,0.3),0 4px 24px rgba(0,0,0,0.15);
-}
-.app-header h1{font-size:19px;font-weight:700;letter-spacing:0.02em;line-height:1.4;}
-.app-header .sub{font-size:12px;opacity:0.8;margin-top:5px;font-family:'DM Mono',monospace;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.85);}
-.tab-nav{display:flex;gap:6px;background:linear-gradient(180deg,#fff 0%,var(--surface-2) 100%);border-bottom:1px solid var(--border-2);position:sticky;top:76px;z-index:99;padding:8px 8px;box-shadow:0 3px 14px rgba(13,59,102,0.08);}
-.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 2px 7px;font-size:12px;font-weight:600;color:var(--text-3);background:transparent;border:1px solid transparent;border-radius:var(--radius-sm);cursor:pointer;white-space:nowrap;}
-.tab-btn:active{transform:scale(0.95);}
-.tab-btn.active{color:#fff;background:linear-gradient(135deg,var(--blue) 0%,var(--blue-dark) 100%);box-shadow:0 3px 10px rgba(13,59,102,0.3);}
-.tab-btn .icon{font-size:18px;line-height:1;}
-.page{display:none;padding:16px 14px 90px;max-width:640px;margin:0 auto;}
+html{-webkit-text-size-adjust:100%;}
+body{font-family:'Noto Sans KR',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;word-break:keep-all;}
+
+/* Header */
+.hero{background:linear-gradient(120deg,#0c2340 0%,#0e3a4a 55%,#0f5a45 100%);color:#fff;padding:20px 18px 18px;padding-top:calc(20px + env(safe-area-inset-top));}
+.hero-inner{max-width:680px;margin:0 auto;}
+.logo-box{display:inline-block;background:#fff;color:var(--green);font-weight:800;font-size:16px;padding:6px 10px;border-radius:4px;letter-spacing:0.02em;}
+.hero .eyebrow{font-size:clamp(10px,3.1vw,12.5px);font-weight:500;letter-spacing:0.03em;color:rgba(255,255,255,0.75);white-space:nowrap;}
+.hero h1{font-size:25px;font-weight:800;line-height:1.3;margin-top:8px;letter-spacing:-0.01em;}
+.hero h1 em{font-style:normal;color:var(--mint);}
+.hero .meta{margin-top:12px;font-size:12.5px;font-weight:700;display:flex;flex-wrap:wrap;gap:4px 16px;}
+
+/* Tabs */
+.tab-nav{display:flex;gap:4px;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;padding:6px 6px;box-shadow:0 2px 10px rgba(12,35,64,0.08);}
+.tab-btn{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 0 6px;font-size:11.5px;font-weight:700;font-family:inherit;color:var(--text-3);background:transparent;border:0;border-radius:var(--radius-sm);cursor:pointer;white-space:nowrap;}
+.tab-btn .icon{font-size:17px;line-height:1;}
+.tab-btn.active{color:#fff;background:linear-gradient(135deg,var(--green-mid),var(--green-dark));box-shadow:0 2px 8px rgba(15,107,56,0.35);}
+.tab-btn:active{transform:scale(0.96);}
+
+.page{display:none;padding:14px 12px 80px;max-width:680px;margin:0 auto;}
 .page.active{display:block;}
-.card{background:#fff;border:1px solid var(--border-1);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:0 2px 12px rgba(13,59,102,0.07);}
-.card-title{font-size:15px;font-weight:700;color:var(--blue-dark);margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+
+/* Cards & text */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:0 1px 6px rgba(12,35,64,0.05);}
+.card-title{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:12px;}
+.pill{display:inline-block;background:var(--green-light);color:var(--green);font-size:11px;font-weight:800;letter-spacing:0.05em;padding:4px 12px;border-radius:20px;margin:6px 0 10px;}
 .field{margin-bottom:12px;}
 .field:last-child{margin-bottom:0;}
-.field label{display:block;font-size:12px;color:var(--text-3);margin-bottom:6px;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;}
-.field input,.field select,.field textarea{width:100%;padding:12px 14px;font-size:16px;font-family:'Noto Sans KR',sans-serif;border:1px solid var(--border-2);border-radius:var(--radius-sm);background:var(--surface-2);color:var(--text);}
-.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-light);background:#fff;}
+.field label{display:block;font-size:12px;color:var(--text-3);margin-bottom:6px;font-weight:700;}
+.field input,.field select,.field textarea{width:100%;padding:12px 13px;font-size:16px;font-family:inherit;border:1px solid var(--border-2);border-radius:var(--radius-sm);background:var(--panel);color:var(--text);-webkit-appearance:none;appearance:none;}
+.field input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(26,138,74,0.15);background:#fff;}
+.field select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%2346586f' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
+.calc-preview{margin-top:10px;background:var(--green-light);border-left:4px solid var(--green);border-radius:8px;padding:10px 12px;font-size:13px;font-weight:700;color:var(--navy);line-height:1.6;}
 .row2{display:flex;gap:10px;}
-.row2 .field{flex:1;}
+.row2 .field{flex:1;min-width:0;}
 .gender-toggle{display:flex;gap:8px;}
-.gender-btn{flex:1;padding:11px;border-radius:var(--radius-sm);border:1px solid var(--border-2);background:var(--surface-2);font-size:14px;font-weight:700;cursor:pointer;color:var(--text-3);}
-.gender-btn.active.male{background:var(--blue-light);border-color:var(--blue);color:var(--blue-dark);}
-.gender-btn.active.female{background:rgba(214,69,120,0.1);border-color:#d64578;color:#9c2f58;}
-.btn{width:100%;padding:13px;font-size:15px;font-weight:700;border:none;border-radius:var(--radius-sm);cursor:pointer;transition:0.15s;}
+.gender-btn{flex:1;padding:11px 0;border-radius:var(--radius-sm);border:1px solid var(--border-2);background:var(--panel);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;color:var(--text-3);}
+.gender-btn.active.male{background:#e3eefc;border-color:#3b78d1;color:#1d4f9c;}
+.gender-btn.active.female{background:#fde7ef;border-color:#d64578;color:#9c2f58;}
+.btn{display:block;width:100%;padding:13px;font-size:15px;font-weight:800;font-family:inherit;border:none;border-radius:var(--radius-sm);cursor:pointer;}
 .btn:active{transform:scale(0.98);}
-.btn-blue{background:linear-gradient(135deg,var(--blue) 0%,var(--blue-dark) 100%);color:#fff;box-shadow:0 3px 10px rgba(13,59,102,0.3);}
-.btn-gold{background:linear-gradient(135deg,#d6a63a 0%,var(--gold) 100%);color:#fff;box-shadow:0 3px 10px rgba(192,138,31,0.3);}
-.btn-gray{background:var(--surface-3);color:var(--text-2);border:1px solid var(--border-2);}
+.btn-blue{background:linear-gradient(135deg,var(--green-mid),var(--green-dark));color:#fff;box-shadow:0 3px 10px rgba(15,107,56,0.3);}
+.btn-gold{background:linear-gradient(135deg,var(--navy-2),var(--navy));color:#fff;box-shadow:0 3px 10px rgba(12,35,64,0.3);}
+.btn-gray{background:var(--panel);color:var(--text-2);border:1px solid var(--border-2);}
 .btn-danger{background:#fdecec;color:var(--danger);border:1px solid rgba(214,69,69,0.3);}
-.btn-sm{padding:8px 12px;font-size:12px;width:auto;}
-.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:var(--blue-dark);color:#fff;padding:12px 20px;border-radius:30px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.25);opacity:0;pointer-events:none;transition:0.25s;z-index:999;max-width:88vw;text-align:center;}
+.btn-sm{display:inline-block;width:auto;padding:8px 12px;font-size:12px;}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;padding:12px 18px;border-radius:30px;font-size:13px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,0.25);opacity:0;pointer-events:none;transition:0.25s;z-index:999;max-width:90vw;text-align:center;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-.empty-state{text-align:center;padding:24px 0;color:var(--text-3);font-size:13px;}
-.list-item{display:flex;align-items:center;justify-content:space-between;padding:11px 4px;border-bottom:1px solid var(--border-1);font-size:14px;}
+.empty-state{text-align:center;padding:22px 0;color:var(--text-3);font-size:13px;}
+.list-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 2px;border-bottom:1px solid var(--border);font-size:14px;}
 .list-item:last-child{border-bottom:none;}
-.badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:6px;}
-.badge.male{background:var(--blue-light);color:var(--blue-dark);}
-.badge.female{background:rgba(214,69,120,0.1);color:#9c2f58;}
-.count-chip{display:flex;gap:8px;margin-bottom:12px;}
-.count-chip div{flex:1;background:var(--surface-2);border-radius:var(--radius-sm);padding:10px;text-align:center;font-size:12px;color:var(--text-3);}
-.count-chip b{display:block;font-size:20px;color:var(--blue-dark);margin-top:2px;}
+.badge{display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:20px;margin-left:6px;}
+.badge.male{background:#e3eefc;color:#1d4f9c;}
+.badge.female{background:#fde7ef;color:#9c2f58;}
+.count-chip{display:flex;gap:8px;margin-bottom:10px;}
+.count-chip div{flex:1;background:var(--panel);border-radius:var(--radius-sm);padding:10px;text-align:center;font-size:12px;color:var(--text-3);border-left:3px solid var(--green);}
+.count-chip b{display:block;font-size:20px;color:var(--navy);margin-top:2px;}
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .data-table{width:100%;border-collapse:collapse;font-size:13px;}
-.data-table th{background:var(--surface-3);color:var(--text-2);font-size:11px;padding:8px 6px;text-align:center;border-bottom:1px solid var(--border-2);}
-.data-table td{padding:9px 6px;text-align:center;border-bottom:1px solid var(--border-1);}
-.data-table input[type=number]{width:62px;padding:7px 4px;text-align:center;font-size:14px;border:1px solid var(--border-2);border-radius:8px;background:var(--surface-2);}
-.table-scroll{overflow-x:auto;}
-.team-card{border:1px solid var(--border-2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:10px;background:var(--surface-2);}
-.team-card .t-name{font-weight:700;color:var(--blue-dark);font-size:14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;}
+.data-table th{background:var(--navy);color:#fff;font-size:11px;padding:8px 6px;text-align:center;white-space:nowrap;}
+.data-table td{padding:8px 6px;text-align:center;border-bottom:1px solid var(--border);}
+.data-table input[type=number]{width:64px;padding:8px 4px;text-align:center;font-size:16px;font-family:inherit;border:1px solid var(--border-2);border-radius:8px;background:var(--panel);}
+.team-card{border:1px solid var(--border);border-left:4px solid var(--green);border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:10px;background:var(--panel);}
+.team-card .t-name{font-weight:800;color:var(--navy);font-size:14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
 .team-card .t-members{display:flex;flex-wrap:wrap;gap:6px;}
-.team-card .t-members span{background:#fff;border:1px solid var(--border-2);border-radius:14px;padding:4px 10px;font-size:12px;}
+.team-card .t-members span{background:#fff;border:1px solid var(--border);border-radius:14px;padding:4px 10px;font-size:12.5px;font-weight:500;}
 .tc-row{display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap;}
-.tc-row input{padding:8px;font-size:13px;border:1px solid var(--border-2);border-radius:8px;background:var(--surface-2);}
-.tc-row .tc-name{width:62px;}
-.tc-row .tc-men,.tc-row .tc-women{width:42px;text-align:center;}
-.tc-row .tc-forced{flex:1;min-width:110px;}
-.tc-row .tc-del{width:auto;padding:8px 10px;font-size:12px;}
+.tc-row input{padding:8px;font-size:16px;font-family:inherit;border:1px solid var(--border-2);border-radius:8px;background:var(--panel);}
+.tc-row .tc-name{width:64px;}
+.tc-row .tc-men,.tc-row .tc-women{width:46px;text-align:center;}
+.tc-row .tc-forced{flex:1;min-width:120px;}
+.tc-row .tc-del{display:inline-block;width:auto;padding:8px 10px;font-size:12px;}
 .warn-box{font-size:12px;color:var(--danger);margin-top:8px;line-height:1.6;}
-.rank-row{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border-1);}
-.rank-num{width:30px;text-align:center;font-weight:800;font-size:15px;color:var(--blue-dark);}
-.rank-row.top1 .rank-num{color:#c08a1f;} .rank-row.top2 .rank-num{color:#8a97a6;} .rank-row.top3 .rank-num{color:#b8702e;}
-.rank-name{flex:1;font-size:14px;font-weight:600;}
-.rank-sub{font-size:11px;color:var(--text-3);}
-.rank-net{font-weight:800;font-size:15px;color:var(--blue-dark);}
-.lock-note{font-size:12px;color:var(--text-3);text-align:center;padding:14px 0;}
+.rank-row{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--border);}
+.rank-row:last-child{border-bottom:none;}
+.rank-num{width:32px;text-align:center;font-weight:800;font-size:15px;color:var(--navy);flex-shrink:0;}
+.rank-name{flex:1;min-width:0;font-size:14px;font-weight:700;}
+.rank-sub{font-size:11px;color:var(--text-3);font-weight:400;margin-top:2px;}
+.rank-net{font-weight:800;font-size:16px;color:var(--green);flex-shrink:0;}
+
+/* 일정 페이지 */
+.seg{display:flex;background:#e3e9f0;border-radius:var(--radius-sm);padding:3px;margin-bottom:12px;}
+.seg button{flex:1;padding:10px 0;font-size:14px;font-weight:800;font-family:inherit;border:0;border-radius:8px;background:transparent;color:var(--text-3);cursor:pointer;}
+.seg button.active{background:#fff;color:var(--navy);box-shadow:0 1px 4px rgba(12,35,64,0.15);}
+.seg button{font-size:13.5px;}
+.help-call{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;background:linear-gradient(135deg,var(--green-mid),var(--green-dark));color:#fff;border:0;border-radius:var(--radius-sm);padding:13px 15px;margin-bottom:12px;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 3px 10px rgba(15,107,56,0.3);}
+.help-call small{display:block;font-size:11.5px;font-weight:500;opacity:0.9;margin-top:2px;}
+.hstep{display:flex;gap:12px;margin-bottom:14px;}
+.hstep:last-child{margin-bottom:0;}
+.hnum{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+.hbody{min-width:0;flex:1;}
+.hbody h4{font-size:15px;color:var(--navy);margin-bottom:2px;}
+.hbody .when{display:inline-block;font-size:11px;font-weight:800;color:var(--green-dark);background:var(--green-light);padding:2px 8px;border-radius:10px;margin-bottom:6px;}
+.hbody ul{list-style:none;}
+.hbody li{font-size:13.5px;color:var(--text-2);line-height:1.65;padding-left:14px;position:relative;margin-bottom:3px;}
+.hbody li::before{content:'';position:absolute;left:2px;top:9px;width:5px;height:5px;border-radius:50%;background:var(--green-mid);}
+.hbody li b{color:var(--navy);}
+.warn-tip{background:var(--gold-bg);border-left:4px solid var(--gold-line);border-radius:8px;padding:9px 12px;font-size:12.5px;color:var(--gold-text);font-weight:700;line-height:1.6;margin-top:6px;}
+.ex-box{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:13.5px;line-height:1.9;color:var(--navy);}
+.ex-box b.r{color:var(--green);font-size:15px;}
+.faq q{display:block;font-weight:800;color:var(--navy);font-size:13.5px;quotes:none;margin-top:10px;}
+.faq q::before{content:'Q. ';color:var(--green);}
+.faq p{font-size:13px;color:var(--text-2);line-height:1.65;margin-top:2px;}
+.sec{display:none;} .sec.active{display:block;}
+.info-row{display:flex;background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:8px;}
+.info-row .k{background:var(--navy);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;width:62px;flex-shrink:0;}
+.info-row .v{padding:11px 13px;min-width:0;}
+.info-row .v b{display:block;font-size:15px;color:var(--navy);}
+.info-row .v small{display:block;font-size:12px;color:var(--text-3);margin-top:2px;}
+.room-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0;}
+.room-grid div{background:var(--panel);border-left:3px solid var(--green);border-radius:6px;padding:9px 10px;font-size:12px;color:var(--text-3);}
+.room-grid b{display:block;font-size:19px;color:var(--navy);margin-top:2px;}
+.chip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:7px;}
+.chip-grid span{background:#fff;border:1px solid var(--border);border-radius:8px;padding:9px 4px;text-align:center;font-size:14px;font-weight:700;color:var(--navy);}
+.bar{display:flex;border-radius:20px;overflow:hidden;height:22px;margin:6px 0 4px;font-size:11px;font-weight:800;color:#fff;}
+.bar i{display:flex;align-items:center;justify-content:center;font-style:normal;}
+.bar .b1{flex:1;background:var(--mint);} .bar .b2{flex:7;background:var(--green);} .bar .b3{flex:3;background:var(--navy);}
+.bar-t{display:flex;justify-content:space-between;font-size:10.5px;color:var(--text-3);margin-bottom:12px;font-family:'DM Mono',monospace;}
+.tl{border-left:2px dotted var(--border-2);margin-left:14px;padding-left:16px;}
+.tl-item{border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:10px;position:relative;border-left:4px solid var(--green);background:var(--green-light);}
+.tl-item.last{background:#e8edf6;border-left-color:var(--navy);}
+.tl-item::before{content:'';position:absolute;left:-30px;top:16px;width:12px;height:12px;border-radius:50%;background:var(--green);border:2px solid #fff;}
+.tl-item.last::before{background:var(--navy);}
+.tl-item .time{font-size:17px;font-weight:800;color:var(--green);}
+.tl-item.last .time{color:var(--navy);}
+.tl-item .what{font-size:15px;font-weight:800;color:var(--navy);margin-top:2px;}
+.tl-item .dur{display:inline-block;margin-top:6px;background:var(--navy);color:#fff;font-size:11px;font-weight:800;padding:2px 9px;border-radius:12px;}
+.photo{border:1.5px dashed var(--gold-line);background:var(--gold-bg);color:var(--gold-text);text-align:center;font-weight:800;font-size:14px;padding:12px;border-radius:var(--radius-sm);}
+.cost-table{width:100%;border-collapse:collapse;font-size:13.5px;}
+.cost-table th{background:var(--navy);color:#fff;font-size:12px;padding:10px;text-align:left;}
+.cost-table td{padding:12px 10px;border-bottom:1px solid var(--border);}
+.cost-table td.p{font-weight:800;white-space:nowrap;}
+.cost-table td.n{font-size:11.5px;color:var(--text-3);}
+.account{margin-top:10px;background:var(--gold-bg);border-left:4px solid var(--gold-line);border-radius:8px;padding:11px 13px;}
+.account small{display:block;font-size:12px;font-weight:800;color:var(--gold-text);}
+.account b{display:block;font-size:16px;color:var(--navy);margin-top:3px;word-break:break-all;}
+.grade{display:grid;grid-template-columns:70px repeat(3,1fr);gap:0;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:8px;background:#fff;}
+.grade .gk{background:var(--navy);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.grade .gc{text-align:center;padding:8px 2px;border-left:1px solid var(--border);}
+.grade .gc small{display:block;font-size:11px;color:var(--text-3);}
+.grade .gc b{display:block;font-size:19px;color:var(--navy);margin-top:2px;}
+.note{border-left:3px solid var(--green);padding:6px 0 6px 11px;font-size:12px;color:var(--text-2);line-height:1.7;margin-top:10px;}
+.prize-h{font-size:14px;font-weight:800;color:var(--navy);margin:14px 0 8px;}
+.prize{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--panel);border-left:3px solid var(--green);border-radius:8px;padding:10px 12px;margin-bottom:7px;}
+.prize.gold{border-left-color:var(--gold-line);}
+.prize .l{min-width:0;} .prize .l b{display:block;font-size:13.5px;color:var(--navy);} .prize .l small{font-size:11px;color:var(--text-3);}
+.prize .r{font-size:13px;font-weight:800;color:var(--green-dark);text-align:right;flex-shrink:0;max-width:48%;}
+.foot-note{text-align:center;font-size:12px;color:var(--text-3);line-height:1.7;padding:6px 8px 0;}
+@media (max-width:360px){
+  .hero h1{font-size:22px;}
+  .tab-btn{font-size:10.5px;}
+  .grade{grid-template-columns:58px repeat(3,1fr);}
+}
 </style>
 </head>
 <body>
 
-<div class="app-header">
-  <h1>🏥 서울대병원 개원기념<br>스크린골프대회</h1>
-  <div class="sub">PLAYER &amp; SCORE MANAGEMENT</div>
+<div class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow">SNUH GOLF SOCIETY · 2026 개원기념일 행사</div>
+    <h1>SGS 스크린골프동호회<br><em>단합대회</em></h1>
+  </div>
 </div>
 
 <div class="tab-nav">
-  <button class="tab-btn active" id="tab-reg" onclick="switchTab('reg')"><span class="icon">📝</span>참가등록</button>
+  <button class="tab-btn active" id="tab-info" onclick="switchTab('info')"><span class="icon">📅</span>일정</button>
+  <button class="tab-btn" id="tab-reg" onclick="switchTab('reg')"><span class="icon">📝</span>참가등록</button>
   <button class="tab-btn" id="tab-team" onclick="switchTab('team')"><span class="icon">👥</span>팀편성</button>
   <button class="tab-btn" id="tab-score" onclick="switchTab('score')"><span class="icon">⛳</span>스코어</button>
   <button class="tab-btn" id="tab-rank" onclick="switchTab('rank')"><span class="icon">🏆</span>순위</button>
 </div>
 
+<!-- 일정 -->
+<div class="page active" id="page-info">
+  <div class="seg">
+    <button class="active" id="seg-guide" onclick="switchSeg('guide')">대회 안내</button>
+    <button id="seg-prize" onclick="switchSeg('prize')">시상 안내</button>
+    <button id="seg-help" onclick="switchSeg('help')">사용 방법</button>
+  </div>
+
+  <div class="sec active" id="sec-guide">
+    <button class="help-call" onclick="switchSeg('help')"><span>📖 처음이세요? 사용 방법 보기<small>등록 → 팀 확인 → 점수 입력 → 순위, 4단계면 끝!</small></span><span style="font-size:20px;">›</span></button>
+    <span class="pill">INFO</span>
+    <div class="info-row"><div class="k">일시</div><div class="v"><b>2026년 10월 15일 (목)</b><small>09:30 ~ 15:00</small></div></div>
+    <div class="info-row"><div class="k">장소</div><div class="v"><b>골프존파크 쌍문 고골프누리</b><small>서울 도봉구 도봉로 575 삼환프라자 5층</small></div></div>
+
+    <div class="card" style="margin-top:12px;">
+      <div class="card-title">세부일정</div>
+      <div class="bar"><i class="b1"></i><i class="b2">스크린 대회</i><i class="b3">시상·식사</i></div>
+      <div class="bar-t"><span>09:30</span><span>13:30</span><span>15:00</span></div>
+      <div class="tl">
+        <div class="tl-item"><div class="time">09:30 – 10:00</div><div class="what">스크린 장소 집결</div><span class="dur">30분</span></div>
+        <div class="tl-item"><div class="time">10:00 – 13:30</div><div class="what">스크린 대회</div><span class="dur">3시간 30분</span></div>
+        <div class="tl-item last"><div class="time">13:30 – 15:00</div><div class="what">시상 및 식사</div><span class="dur">1시간 30분</span></div>
+      </div>
+      <div class="photo">📸 시상 후 사진촬영</div>
+    </div>
+
+    <span class="pill">PARTICIPANTS</span>
+    <div class="info-row"><div class="k">인원</div><div class="v"><b>참석인원 22명 (중 1명 점심만 참석)</b><small>스크린 조편성 · 당일 랜덤 배정</small></div></div>
+    <div class="room-grid">
+      <div>1방<b>4명</b></div><div>2방<b>4명</b></div><div>3방<b>4명</b></div>
+      <div>4방<b>3명</b></div><div>5방<b>3명</b></div><div>6방<b>3명</b></div>
+    </div>
+    <div class="card">
+      <div class="card-title">스크린 플레이어 (21명)</div>
+      <div class="chip-grid">
+        <span>국명수</span><span>홍순기</span><span>김영화</span><span>김형진</span><span>오승희</span><span>문희정</span><span>박영희</span>
+        <span>성지현</span><span>신윤숙</span><span>우홍균</span><span>이진우</span><span>임경달</span><span>정진경</span><span>남미선</span>
+        <span>정기동</span><span>유태민</span><span>이근우</span><span>김새로미</span><span>채승엽</span><span>황세하</span><span>윤혜전</span>
+      </div>
+    </div>
+
+    <span class="pill">COST</span>
+    <div class="card">
+      <table class="cost-table">
+        <thead><tr><th>내역</th><th>비용</th><th>비고</th></tr></thead>
+        <tbody>
+          <tr><td><b>참석비 · 회원</b></td><td class="p">20,000원</td><td class="n">월회비 납입 회원</td></tr>
+          <tr><td><b>참석비 · 비회원</b></td><td class="p">40,000원</td><td class="n">월회비 미납 회원</td></tr>
+        </tbody>
+      </table>
+      <div class="account"><small>회비 입금 계좌</small><b>110-549-641710 (신한은행 · 임경달)</b></div>
+    </div>
+  </div>
+
+  <div class="sec" id="sec-prize">
+    <span class="pill">STEP 1</span>
+    <div class="card">
+      <div class="card-title">시상 산정 방식</div>
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:10px;line-height:1.6;">실력등급별 스코어 보정치를 적용한 G핸디 기준으로 순위를 산정합니다.</div>
+      <div class="grade"><div class="gk">독수리</div><div class="gc"><small>골드</small><b>+2</b></div><div class="gc"><small>실버</small><b>+2</b></div><div class="gc"><small>브론즈</small><b>+1</b></div></div>
+      <div class="grade"><div class="gk">매</div><div class="gc"><small>골드</small><b>0</b></div><div class="gc"><small>실버</small><b>-1</b></div><div class="gc"><small>브론즈</small><b>-2</b></div></div>
+      <div class="grade"><div class="gk">학</div><div class="gc"><small>골드</small><b>-3</b></div><div class="gc"><small>실버</small><b>-4</b></div><div class="gc"><small>브론즈</small><b>-4</b></div></div>
+      <div class="grade"><div class="gk">까치</div><div class="gc"><small>골드</small><b>-6</b></div><div class="gc"><small>실버</small><b>-7</b></div><div class="gc"><small>브론즈</small><b>-7</b></div></div>
+      <div class="grade"><div class="gk">참새</div><div class="gc"><small>골드</small><b>-9</b></div><div class="gc"><small>실버</small><b>-10</b></div><div class="gc"><small>브론즈</small><b>-10</b></div></div>
+      <div class="note">★ 대회방식 추천 보상을 활용하여 보정치를 산정하였습니다.<br>★ 정확한 G핸디 보정은 다소 차이가 있을 수 있으니 양해 부탁드립니다.</div>
+    </div>
+
+    <span class="pill">STEP 2</span>
+    <div class="card">
+      <div class="card-title">스크린 대회 시상</div>
+      <div style="font-size:12.5px;color:var(--text-2);margin-bottom:10px;">참가만 해도 기념품을 드리고, 다양한 부문에서 상품을 준비했습니다.</div>
+      <div class="prize gold"><div class="l"><b>참가 기념품</b><small>전원 증정</small></div><div class="r">골프장갑 &amp; 골프 티</div></div>
+
+      <div class="prize-h">스트로크 순위</div>
+      <div class="prize"><div class="l"><b>1위 (종합)</b></div><div class="r">상품권 10만원</div></div>
+      <div class="prize"><div class="l"><b>2위 (종합)</b></div><div class="r">상품권 5만원</div></div>
+      <div class="prize"><div class="l"><b>3위 (종합)</b><small>회장님 찬조</small></div><div class="r">볼&amp;마커 세트</div></div>
+      <div class="prize"><div class="l"><b>1위 (여성부)</b></div><div class="r">화장품 세트</div></div>
+
+      <div class="prize-h">스페셜 상</div>
+      <div class="prize"><div class="l"><b>롱기스트(남)</b><small>회장님 찬조</small></div><div class="r">볼&amp;마커 세트</div></div>
+      <div class="prize"><div class="l"><b>롱기스트(여)</b><small>문총무님 찬조</small></div><div class="r">드라이버커버</div></div>
+      <div class="prize"><div class="l"><b>니어리스트(남)</b><small>회장님 찬조</small></div><div class="r">볼&amp;마커 세트</div></div>
+      <div class="prize"><div class="l"><b>니어리스트(여)</b></div><div class="r">볼&amp;마커 세트</div></div>
+
+      <div class="prize-h">多 상</div>
+      <div class="prize"><div class="l"><b>多 버디</b><small>회장님 찬조</small></div><div class="r">볼&amp;마커 세트</div></div>
+      <div class="prize"><div class="l"><b>多 파</b><small>회장님 찬조</small></div><div class="r">볼&amp;마커 세트</div></div>
+      <div class="prize"><div class="l"><b>多 보기</b><small>회장님 찬조</small></div><div class="r">골프공</div></div>
+      <div class="prize"><div class="l"><b>多 더블파</b><small>회장님 찬조</small></div><div class="r">골프공</div></div>
+
+      <div class="prize-h">행운상</div>
+      <div class="prize"><div class="l"><b>행운상(뽑기)</b><small>회장님 찬조</small></div><div class="r">볼&amp;마커 세트</div></div>
+      <div class="prize"><div class="l"><b>행운상(뽑기)</b><small>회장님 찬조</small></div><div class="r">볼&amp;마커 세트</div></div>
+    </div>
+    <div class="foot-note">※ 많은 분들의 시상을 위해 중복 시상자 발생 시 다음 순위로 넘어갑니다.</div>
+  </div>
+
+  <div class="sec" id="sec-help">
+    <span class="pill">HOW TO USE</span>
+    <div class="card">
+      <div class="card-title">이렇게 하시면 됩니다 (총 4단계)</div>
+
+      <div class="hstep"><div class="hnum">1</div><div class="hbody">
+        <h4>참가등록 하기</h4><span class="when">대회 전 · 1분이면 끝</span>
+        <ul>
+          <li>화면 위쪽 <b>📝 참가등록</b> 탭을 누르세요.</li>
+          <li><b>이름</b>(본인 이름 그대로), <b>성별</b>, <b>자기핸디</b> 숫자를 입력하세요.</li>
+          <li><b>등급</b>(독수리·매·학·까치·참새)과 <b>티</b>(골드·실버·브론즈)를 고르세요. 등급표는 <b>일정 → 시상 안내</b>에서 볼 수 있어요.</li>
+          <li>초록색 상자에 <b>최종핸디</b>가 자동으로 나옵니다. 확인하고 <b>[참가 등록]</b>을 누르면 끝!</li>
+          <li>잘못 넣었다면 아래 명단에서 내 이름 옆 <b>[수정]</b>을 누르세요.</li>
+        </ul>
+      </div></div>
+
+      <div class="hstep"><div class="hnum">2</div><div class="hbody">
+        <h4>내 팀(방) 확인하기</h4><span class="when">대회 당일 · 편성 후</span>
+        <ul>
+          <li><b>👥 팀편성</b> 탭에서 내 이름이 있는 팀을 찾으세요. 같은 팀이 한 방에서 같이 칩니다.</li>
+          <li>팀은 당일 운영진이 자동으로 편성합니다.</li>
+        </ul>
+        <div class="warn-tip">⚠ [자동 팀편성 실행] 버튼은 운영진만 눌러주세요. 다시 누르면 팀이 바뀝니다!</div>
+      </div></div>
+
+      <div class="hstep"><div class="hnum">3</div><div class="hbody">
+        <h4>경기 끝나고 친타수 입력</h4><span class="when">스크린 대회 종료 후</span>
+        <ul>
+          <li><b>⛳ 스코어</b> 탭에서 <b>내 이름 줄</b>을 찾으세요.</li>
+          <li><b>친타수</b> 칸에 오늘 친 <b>총 타수</b>를 숫자로 입력하세요.</li>
+          <li>입력 후 키보드 <b>[완료]</b>를 누르거나 빈 곳을 터치하면 <b>자동 저장</b>됩니다. ("저장" 알림이 뜨면 성공)</li>
+          <li>잘못 넣었으면 다시 입력하면 그 숫자로 바뀝니다.</li>
+        </ul>
+      </div></div>
+
+      <div class="hstep"><div class="hnum">4</div><div class="hbody">
+        <h4>순위 확인하기</h4><span class="when">모두 입력 후 자동 계산</span>
+        <ul>
+          <li><b>🏆 순위</b> 탭에서 <b>개인 순위</b>와 <b>팀 순위</b>를 바로 볼 수 있어요.</li>
+          <li>점수가 입력될 때마다 <b>자동으로 다시 계산</b>됩니다. 따로 누를 버튼은 없어요.</li>
+        </ul>
+      </div></div>
+    </div>
+
+    <span class="pill">POINT</span>
+    <div class="card">
+      <div class="card-title">순위는 이렇게 계산돼요</div>
+      <div class="ex-box">
+        자기핸디 <b>7</b> + 보정 <b>-2</b> = 최종핸디 <b>5</b><br>
+        친타수 <b>10</b> − 최종핸디 <b>5</b> = 최종스코어 <b class="r">5</b>
+      </div>
+      <div class="note">★ <b>최종스코어가 낮을수록</b> 높은 순위입니다.<br>★ 보정 숫자는 등급과 티를 고르면 자동으로 적용되니 직접 계산하실 필요 없어요.<br>★ 팀 순위는 팀원 최종스코어의 <b>평균</b>으로 정해요. (4명팀·3명팀 공평하게)</div>
+    </div>
+
+    <span class="pill">FAQ</span>
+    <div class="card faq">
+      <div class="card-title" style="margin-bottom:0;">자주 묻는 질문</div>
+      <q>제 등급(독수리·매…)을 모르겠어요</q>
+      <p>운영진에게 물어보고 선택해 주세요. 등급·티별 보정 숫자는 일정 → 시상 안내에 있습니다.</p>
+      <q>이름이 이미 등록됐다고 나와요</q>
+      <p>이미 등록되어 있다는 뜻이에요. 참가등록 탭 아래 명단에서 내 이름을 찾아 [수정]을 누르세요.</p>
+      <q>입력했는데 화면이 안 바뀌어요</q>
+      <p>인터넷 연결을 확인하고 화면을 아래로 당겨 새로고침해 보세요. 입력한 내용은 서버에 저장되어 있습니다.</p>
+      <q>이름에 특수문자가 안 들어가요</q>
+      <p>. $ # [ ] / 같은 기호는 쓸 수 없어요. 한글 이름만 입력하시면 됩니다.</p>
+    </div>
+  </div>
+</div>
+
 <!-- 참가등록 -->
-<div class="page active" id="page-reg">
+<div class="page" id="page-reg">
   <div class="card">
-    <div class="card-title">📝 참가 신청 (이름 · 성별 · 지정핸디)</div>
+    <div class="card-title">📝 참가 신청 (이름 · 성별 · 핸디 · 등급)</div>
     <div class="field">
       <label>이름</label>
       <input id="regName" placeholder="이름을 입력하세요">
@@ -124,10 +378,26 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--surface-0);color:var
         </div>
       </div>
       <div class="field">
-        <label>지정핸디</label>
-        <input id="regHandi" type="number" step="0.1" placeholder="예: 12">
+        <label>자기핸디</label>
+        <input id="regHandi" type="number" step="0.1" inputmode="decimal" placeholder="예: 7" oninput="updateCalcPreview()">
       </div>
     </div>
+    <div class="row2">
+      <div class="field">
+        <label>등급</label>
+        <select id="regGrade" onchange="updateCalcPreview()">
+          <option value="">선택</option><option>독수리</option><option>매</option><option>학</option><option>까치</option><option>참새</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>티 (골드/실버/브론즈)</label>
+        <select id="regTier" onchange="updateCalcPreview()">
+          <option value="">선택</option><option>골드</option><option>실버</option><option>브론즈</option>
+        </select>
+      </div>
+    </div>
+    <div class="calc-preview" id="calcPreview">자기핸디와 등급을 선택하면 최종핸디가 계산됩니다.</div>
+    <div style="height:12px;"></div>
     <button class="btn btn-blue" id="regSubmitBtn" onclick="registerPlayer()">참가 등록</button>
     <button class="btn btn-gray" id="regCancelBtn" style="display:none;margin-top:8px;" onclick="cancelEdit()">수정 취소</button>
   </div>
@@ -178,11 +448,11 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--surface-0);color:var
 <!-- 순위 -->
 <div class="page" id="page-rank">
   <div class="card">
-    <div class="card-title">🏆 개인 순위 (넷스코어 = 친타수 − 지정핸디)</div>
+    <div class="card-title">🏆 개인 순위 (최종스코어 = 친타수 − 최종핸디)</div>
     <div id="indivRank"><div class="empty-state">입력된 스코어가 없습니다</div></div>
   </div>
   <div class="card">
-    <div class="card-title">🏆 팀 순위 (팀 평균 넷스코어)</div>
+    <div class="card-title">🏆 팀 순위 (팀 평균 최종스코어)</div>
     <div id="teamRank"><div class="empty-state">편성된 팀이 없습니다</div></div>
   </div>
 </div>
@@ -204,6 +474,19 @@ const firebaseConfig = {
 const ROOT = "snuh_tour_2026";
 
 var db = null, useFirebase = false;
+var ADJ = { "독수리": {"골드":2,"실버":2,"브론즈":1}, "매": {"골드":0,"실버":-1,"브론즈":-2}, "학": {"골드":-3,"실버":-4,"브론즈":-4}, "까치": {"골드":-6,"실버":-7,"브론즈":-7}, "참새": {"골드":-9,"실버":-10,"브론즈":-10} };
+function adjOf(grade, tier) { return (ADJ[grade] && ADJ[grade][tier] !== undefined) ? ADJ[grade][tier] : null; }
+function fmtSigned(n) { return (n > 0 ? "+" : "") + n; }
+function round1(n) { return Math.round(n * 10) / 10; }
+function finalHandi(p) { return round1(Number(p.handi) + Number(p.adj || 0)); }
+function updateCalcPreview() {
+  var el = document.getElementById("calcPreview");
+  var hs = document.getElementById("regHandi").value.trim();
+  var g = document.getElementById("regGrade").value, t = document.getElementById("regTier").value;
+  var a = adjOf(g, t);
+  if (hs === "" || isNaN(Number(hs)) || a === null) { el.textContent = "자기핸디와 등급을 선택하면 최종핸디가 계산됩니다."; return; }
+  el.innerHTML = "자기핸디 " + hs + " + 보정 " + fmtSigned(a) + " = <span style='color:var(--green);font-size:15px;'>최종핸디 " + round1(Number(hs) + a) + "</span>";
+}
 var players = {};   // { 이름: {name, gender, handi, score, team} }
 var teams = {};      // { 0: {name, men, women, members:[...]}, ... }
 var admin = true; // 관리자 없음: 모두 직접 수정 가능
@@ -215,14 +498,16 @@ try {
   db = firebase.database();
   useFirebase = true;
   db.ref(ROOT + "/players").on("value", function(snap) {
-    players = snap.val() || {};
+    var raw = snap.val() || {}, clean = {};
+    Object.keys(raw).forEach(function(k) { var p = raw[k]; if (p && p.name && p.gender) clean[k] = p; });
+    players = clean;
     renderAll();
-  });
+  }, function(err) { console.error(err); toast("서버 연결 오류 — 새로고침 해주세요"); });
   db.ref(ROOT + "/teams").on("value", function(snap) {
     teams = snap.val() || {};
     renderTeams();
     renderRank();
-  });
+  }, function(err) { console.error(err); });
 } catch (e) {
   console.error("Firebase 초기화 실패", e);
   useFirebase = false;
@@ -238,13 +523,22 @@ function toast(msg) {
 }
 
 function switchTab(name) {
-  ["reg","team","score","rank"].forEach(function(n) {
+  ["info","reg","team","score","rank"].forEach(function(n) {
     document.getElementById("page-" + n).classList.toggle("active", n === name);
     document.getElementById("tab-" + n).classList.toggle("active", n === name);
   });
+  window.scrollTo(0, 0);
   if (name === "score") renderScoreInput();
   if (name === "rank") renderRank();
   if (name === "team") renderTeams();
+}
+
+function switchSeg(n) {
+  ["guide","prize","help"].forEach(function(k) {
+    document.getElementById("sec-" + k).classList.toggle("active", k === n);
+    document.getElementById("seg-" + k).classList.toggle("active", k === n);
+  });
+  window.scrollTo(0, 0);
 }
 
 function setRegGender(g) {
@@ -257,12 +551,16 @@ function registerPlayer() {
   var name = document.getElementById("regName").value.trim();
   var handiStr = document.getElementById("regHandi").value.trim();
   if (!name) { toast("이름을 입력하세요"); return; }
+  if (/[.$#\[\]\/<>"'`\\]/.test(name) || name.length > 20) { toast("이름에 특수문자(. $ # [ ] / < > 따옴표)는 쓸 수 없습니다"); return; }
   if (players[name] && editingName !== name) { toast("이미 등록된 이름입니다"); return; }
-  if (handiStr === "") { toast("지정핸디를 입력하세요"); return; }
+  if (handiStr === "") { toast("자기핸디를 입력하세요"); return; }
   var handi = Number(handiStr);
-  if (isNaN(handi)) { toast("지정핸디는 숫자로 입력하세요"); return; }
+  if (isNaN(handi)) { toast("자기핸디는 숫자로 입력하세요"); return; }
+  var grade = document.getElementById("regGrade").value, tier = document.getElementById("regTier").value;
+  var adj = adjOf(grade, tier);
+  if (adj === null) { toast("등급과 티(골드/실버/브론즈)를 선택하세요"); return; }
   var prev = players[name] || {};
-  var data = { name: name, gender: regGender, handi: handi, score: (prev.score === undefined ? "" : prev.score), team: (prev.team || null), timestamp: prev.timestamp || Date.now() };
+  var data = { name: name, gender: regGender, handi: handi, grade: grade, tier: tier, adj: adj, score: (prev.score === undefined ? "" : prev.score), team: (prev.team || null), timestamp: prev.timestamp || Date.now() };
   var wasEdit = (editingName === name);
   if (useFirebase) {
     db.ref(ROOT + "/players/" + name).set(data);
@@ -279,6 +577,9 @@ function editPlayer(name) {
   document.getElementById("regName").value = name;
   document.getElementById("regName").disabled = true;
   document.getElementById("regHandi").value = p.handi;
+  document.getElementById("regGrade").value = p.grade || "";
+  document.getElementById("regTier").value = p.tier || "";
+  updateCalcPreview();
   setRegGender(p.gender);
   document.getElementById("regSubmitBtn").textContent = "수정 저장";
   document.getElementById("regCancelBtn").style.display = "";
@@ -289,6 +590,9 @@ function cancelEdit() {
   document.getElementById("regName").value = "";
   document.getElementById("regName").disabled = false;
   document.getElementById("regHandi").value = "";
+  document.getElementById("regGrade").value = "";
+  document.getElementById("regTier").value = "";
+  updateCalcPreview();
   document.getElementById("regSubmitBtn").textContent = "참가 등록";
   document.getElementById("regCancelBtn").style.display = "none";
 }
@@ -321,7 +625,7 @@ function renderRegList() {
     var p = players[n];
     var badge = '<span class="badge ' + p.gender + '">' + (p.gender === 'male' ? '남' : '여') + '</span>';
     var q = n.replace(/'/g, "\\'");
-    return '<div class="list-item"><span>' + p.name + badge + '<span style="color:var(--text-3); font-size:12px; margin-left:6px;">핸디 ' + p.handi + (p.team ? ' · ' + p.team : '') + '</span></span>'
+    return '<div class="list-item"><span>' + p.name + badge + '<span style="color:var(--text-3); font-size:12px; margin-left:6px;">최종핸디 ' + finalHandi(p) + (p.grade ? ' (' + p.grade + '·' + p.tier + ')' : '') + (p.team ? ' · ' + p.team : '') + '</span></span>'
       + '<span style="display:flex; gap:6px;"><button class="btn btn-gray btn-sm" onclick="editPlayer(\'' + q + '\')">수정</button><button class="btn btn-danger btn-sm" onclick="deletePlayer(\'' + q + '\')">삭제</button></span></div>';
   }).join("");
 }
@@ -457,7 +761,7 @@ function renderTeams() {
     var members = (t.members || []).map(function(nm) {
       var p = players[nm];
       var g = p ? (p.gender === 'male' ? '남' : '여') : '?';
-      var h = p ? p.handi : '-';
+      var h = p ? finalHandi(p) : '-';
       return '<span>' + nm + ' (' + g + '·' + h + ')</span>';
     }).join("");
     return '<div class="team-card"><div class="t-name"><span>' + t.name + '</span><span style="font-size:11px; color:var(--text-3); font-weight:400;">' + (t.members ? t.members.length : 0) + '명</span></div><div class="t-members">' + members + '</div></div>';
@@ -472,11 +776,11 @@ function renderScoreInput() {
     return a.localeCompare(b, 'ko');
   });
   if (!names.length) { wrap.innerHTML = '<div class="empty-state">등록된 참가자가 없습니다</div>'; return; }
-  wrap.innerHTML = '<div class="table-scroll"><table class="data-table"><thead><tr><th>이름</th><th>팀</th><th>지정핸디</th><th>친타수</th></tr></thead><tbody>'
+  wrap.innerHTML = '<div class="table-scroll"><table class="data-table"><thead><tr><th>이름</th><th>팀</th><th>자기핸디</th><th>보정</th><th>최종핸디</th><th>친타수</th></tr></thead><tbody>'
     + names.map(function(n) {
         var p = players[n];
         return '<tr><td style="text-align:left;">' + p.name + '<span class="badge ' + p.gender + '">' + (p.gender === 'male' ? '남' : '여') + '</span></td>'
-          + '<td>' + (p.team || '-') + '</td><td>' + p.handi + '</td>'
+          + '<td>' + (p.team || '-') + '</td><td>' + p.handi + '</td><td>' + fmtSigned(Number(p.adj || 0)) + '</td><td><b>' + finalHandi(p) + '</b></td>'
           + '<td><input type="number" step="0.1" value="' + (p.score === "" || p.score === undefined || p.score === null ? "" : p.score) + '" onchange="saveScore(\'' + n.replace(/'/g, "\\'") + '\', this.value)"></td></tr>';
       }).join("") + '</tbody></table></div>';
 }
@@ -506,7 +810,7 @@ function renderIndivRank() {
     return s !== "" && s !== undefined && s !== null && !isNaN(Number(s));
   }).map(function(n) {
     var p = players[n];
-    return { name: p.name, gender: p.gender, team: p.team || '-', handi: Number(p.handi), score: Number(p.score), net: Number(p.score) - Number(p.handi) };
+    return { name: p.name, gender: p.gender, team: p.team || '-', handi: finalHandi(p), score: Number(p.score), net: round1(Number(p.score) - finalHandi(p)) };
   });
   if (!list.length) { wrap.innerHTML = '<div class="empty-state">입력된 스코어가 없습니다</div>'; return; }
   list.sort(function(a, b) { return a.net - b.net; });
@@ -519,7 +823,7 @@ function renderIndivRank() {
     var cls = item.rank === 1 ? 'top1' : item.rank === 2 ? 'top2' : item.rank === 3 ? 'top3' : '';
     var medal = item.rank === 1 ? '🥇' : item.rank === 2 ? '🥈' : item.rank === 3 ? '🥉' : item.rank;
     return '<div class="rank-row ' + cls + '"><div class="rank-num">' + medal + '</div>'
-      + '<div class="rank-name">' + item.name + '<span class="badge ' + item.gender + '">' + (item.gender === 'male' ? '남' : '여') + '</span><div class="rank-sub">' + item.team + ' · 핸디 ' + item.handi + ' · 친타수 ' + item.score + '</div></div>'
+      + '<div class="rank-name">' + item.name + '<span class="badge ' + item.gender + '">' + (item.gender === 'male' ? '남' : '여') + '</span><div class="rank-sub">' + item.team + ' · 최종핸디 ' + item.handi + ' · 친타수 ' + item.score + '</div></div>'
       + '<div class="rank-net">' + item.net + '</div></div>';
   }).join("");
 }
@@ -535,7 +839,7 @@ function renderTeamRank() {
       var p = players[nm];
       return p && p.score !== "" && p.score !== undefined && p.score !== null && !isNaN(Number(p.score));
     });
-    var totalNet = done.reduce(function(sum, nm) { return sum + (Number(players[nm].score) - Number(players[nm].handi)); }, 0);
+    var totalNet = done.reduce(function(sum, nm) { return sum + (Number(players[nm].score) - finalHandi(players[nm])); }, 0);
     var avgNet = done.length ? totalNet / done.length : null;
     return { name: t.name, size: members.length, done: done.length, avgNet: avgNet, complete: members.length > 0 && done.length === members.length };
   });
@@ -558,7 +862,7 @@ function renderTeamRank() {
     }
     var cls = item.rank === 1 ? 'top1' : item.rank === 2 ? 'top2' : item.rank === 3 ? 'top3' : '';
     var medal = item.rank === 1 ? '🥇' : item.rank === 2 ? '🥈' : item.rank === 3 ? '🥉' : item.rank;
-    return '<div class="rank-row ' + cls + '"><div class="rank-num">' + medal + '</div><div class="rank-name">' + item.name + '<div class="rank-sub">' + item.size + '명 · 평균 넷스코어</div></div><div class="rank-net">' + item.avgNet.toFixed(1) + '</div></div>';
+    return '<div class="rank-row ' + cls + '"><div class="rank-num">' + medal + '</div><div class="rank-name">' + item.name + '<div class="rank-sub">' + item.size + '명 · 평균 최종스코어</div></div><div class="rank-net">' + item.avgNet.toFixed(1) + '</div></div>';
   }).join("");
 }
 
