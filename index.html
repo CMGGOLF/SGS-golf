@@ -253,11 +253,11 @@ body{font-family:'Noto Sans KR',-apple-system,'Apple SD Gothic Neo','Malgun Goth
     <div class="card">
       <div class="card-title">시상 산정 방식</div>
       <div style="font-size:12.5px;color:var(--text-2);margin-bottom:10px;line-height:1.6;">실력등급별 스코어 보정치를 적용한 G핸디 기준으로 순위를 산정합니다.</div>
-      <div class="grade"><div class="gk">독수리</div><div class="gc"><small>골드</small><b>+2</b></div><div class="gc"><small>실버</small><b>+2</b></div><div class="gc"><small>브론즈</small><b>+1</b></div></div>
-      <div class="grade"><div class="gk">매</div><div class="gc"><small>골드</small><b>0</b></div><div class="gc"><small>실버</small><b>-1</b></div><div class="gc"><small>브론즈</small><b>-2</b></div></div>
-      <div class="grade"><div class="gk">학</div><div class="gc"><small>골드</small><b>-3</b></div><div class="gc"><small>실버</small><b>-4</b></div><div class="gc"><small>브론즈</small><b>-4</b></div></div>
-      <div class="grade"><div class="gk">까치</div><div class="gc"><small>골드</small><b>-6</b></div><div class="gc"><small>실버</small><b>-7</b></div><div class="gc"><small>브론즈</small><b>-7</b></div></div>
-      <div class="grade"><div class="gk">참새</div><div class="gc"><small>골드</small><b>-9</b></div><div class="gc"><small>실버</small><b>-10</b></div><div class="gc"><small>브론즈</small><b>-10</b></div></div>
+      <div class="grade"><div class="gk">독수리</div><div class="gc"><small>골드</small><b>-2</b></div><div class="gc"><small>실버</small><b>-2</b></div><div class="gc"><small>브론즈</small><b>-1</b></div></div>
+      <div class="grade"><div class="gk">매</div><div class="gc"><small>골드</small><b>0</b></div><div class="gc"><small>실버</small><b>+1</b></div><div class="gc"><small>브론즈</small><b>+2</b></div></div>
+      <div class="grade"><div class="gk">학</div><div class="gc"><small>골드</small><b>+3</b></div><div class="gc"><small>실버</small><b>+4</b></div><div class="gc"><small>브론즈</small><b>+4</b></div></div>
+      <div class="grade"><div class="gk">까치</div><div class="gc"><small>골드</small><b>+6</b></div><div class="gc"><small>실버</small><b>+7</b></div><div class="gc"><small>브론즈</small><b>+7</b></div></div>
+      <div class="grade"><div class="gk">참새</div><div class="gc"><small>골드</small><b>+9</b></div><div class="gc"><small>실버</small><b>+10</b></div><div class="gc"><small>브론즈</small><b>+10</b></div></div>
       <div class="note">★ 대회방식 추천 보상을 활용하여 보정치를 산정하였습니다.<br>★ 정확한 G핸디 보정은 다소 차이가 있을 수 있으니 양해 부탁드립니다.</div>
     </div>
 
@@ -474,11 +474,12 @@ const firebaseConfig = {
 const ROOT = "snuh_tour_2026";
 
 var db = null, useFirebase = false;
-var ADJ = { "독수리": {"골드":2,"실버":2,"브론즈":1}, "매": {"골드":0,"실버":-1,"브론즈":-2}, "학": {"골드":-3,"실버":-4,"브론즈":-4}, "까치": {"골드":-6,"실버":-7,"브론즈":-7}, "참새": {"골드":-9,"실버":-10,"브론즈":-10} };
+var ADJ = { "독수리": {"골드":-2,"실버":-2,"브론즈":-1}, "매": {"골드":0,"실버":1,"브론즈":2}, "학": {"골드":3,"실버":4,"브론즈":4}, "까치": {"골드":6,"실버":7,"브론즈":7}, "참새": {"골드":9,"실버":10,"브론즈":10} };
 function adjOf(grade, tier) { return (ADJ[grade] && ADJ[grade][tier] !== undefined) ? ADJ[grade][tier] : null; }
 function fmtSigned(n) { return (n > 0 ? "+" : "") + n; }
 function round1(n) { return Math.round(n * 10) / 10; }
-function finalHandi(p) { return round1(Number(p.handi) + Number(p.adj || 0)); }
+function adjFor(p) { var a = adjOf(p.grade, p.tier); return a !== null ? a : Number(p.adj || 0); }
+function finalHandi(p) { return round1(Number(p.handi) + adjFor(p)); }
 function updateCalcPreview() {
   var el = document.getElementById("calcPreview");
   var hs = document.getElementById("regHandi").value.trim();
@@ -780,7 +781,7 @@ function renderScoreInput() {
     + names.map(function(n) {
         var p = players[n];
         return '<tr><td style="text-align:left;">' + p.name + '<span class="badge ' + p.gender + '">' + (p.gender === 'male' ? '남' : '여') + '</span></td>'
-          + '<td>' + (p.team || '-') + '</td><td>' + p.handi + '</td><td>' + fmtSigned(Number(p.adj || 0)) + '</td><td><b>' + finalHandi(p) + '</b></td>'
+          + '<td>' + (p.team || '-') + '</td><td>' + p.handi + '</td><td>' + fmtSigned(adjFor(p)) + '</td><td><b>' + finalHandi(p) + '</b></td>'
           + '<td><input type="number" step="0.1" value="' + (p.score === "" || p.score === undefined || p.score === null ? "" : p.score) + '" onchange="saveScore(\'' + n.replace(/'/g, "\\'") + '\', this.value)"></td></tr>';
       }).join("") + '</tbody></table></div>';
 }
